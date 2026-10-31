@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using StudentInformationSystem.Web.Services;
+
 namespace StudentInformationSystem.Web
 {
     public class Program
@@ -6,22 +9,41 @@ namespace StudentInformationSystem.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // 1. MVC və Views
             builder.Services.AddControllersWithViews();
+
+            // 2. HttpContext və HttpClient (API-yə müraciət üçün)
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddHttpClient<IApiService, ApiService>();
+
+            // 3. Cookie Autentifikasiyası (JWT token cookie daxilində saxlanılır)
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                    options.LogoutPath = "/Account/Logout";
+                    options.AccessDeniedPath = "/Account/AccessDenied";
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(120);
+                    options.SlidingExpiration = true;
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                });
+
+            builder.Services.AddAuthorization();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // 4. HTTP Sorğu boru kəməri (Pipeline)
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();
