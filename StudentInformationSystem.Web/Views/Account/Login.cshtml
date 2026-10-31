@@ -1,0 +1,76 @@
+@model StudentInformationSystem.Web.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Sistemə Giriş";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-primary text-white text-center py-3 rounded-top-3">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-mortarboard-fill me-2"></i>Student Information System</h4>
+                <small class="text-white-50">Akademik İdarəetmə Sisteminə Giriş</small>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="UsernameOrEmail" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input asp-for="UsernameOrEmail" id="usernameInput" class="form-control" placeholder="İstifadəçi adı və ya e-poçt" />
+                        </div>
+                        <span asp-validation-for="UsernameOrEmail" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input asp-for="Password" id="passwordInput" class="form-control" placeholder="Şifrə" />
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label"></label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Daxil Ol
+                        </button>
+                    </div>
+                </form>
+
+                <hr class="my-4" />
+
+                <div class="text-center">
+                    <p class="text-muted small mb-2 fw-semibold">Sürətli Sınaq Hesabları (Test üçün bir toxunuşla doldur):</p>
+                    <div class="d-flex flex-wrap justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="fillCredentials('admin', 'Admin123!')">
+                            <i class="bi bi-shield-lock me-1"></i> Admin
+                        </button>
+                        <button type="button" class="btn btn-outline-success btn-sm" onclick="fillCredentials('teacher.leyla', 'Teacher123!')">
+                            <i class="bi bi-person-video3 me-1"></i> Müəllim (Leyla)
+                        </button>
+                        <button type="button" class="btn btn-outline-info btn-sm" onclick="fillCredentials('student.aydan', 'Student123!')">
+                            <i class="bi bi-mortarboard me-1"></i> Tələbə (Aydan)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function fillCredentials(username, password) {
+            document.getElementById('usernameInput').value = username;
+            document.getElementById('passwordInput').value = password;
+        }
+    </script>
+}

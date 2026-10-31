@@ -1,8 +1,172 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Əsas Səhifə";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+    var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+    var fullName = User.FindFirst("FullName")?.Value ?? User.Identity.Name;
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="p-4 p-md-5 mb-4 rounded-3 text-white bg-primary shadow-sm">
+                <div class="container-fluid py-2">
+                    <h1 class="display-6 fw-bold">Xoş gəlmisiniz, @fullName!</h1>
+                    <p class="col-md-8 fs-5 mb-0">
+                        @if (role == "Admin")
+                        {
+                            <span>Siz sistemə <strong>Admin</strong> səlahiyyəti ilə daxil olmusunuz. Akademik strukturu, kursları və istifadəçiləri idarə edə bilərsiniz.</span>
+                        }
+                        else if (role == "Teacher")
+                        {
+                            var title = User.FindFirst("Title")?.Value ?? "Müəllim";
+                            var dept = User.FindFirst("DepartmentName")?.Value ?? "Şöbə";
+                            <span>Vəzifə: <strong>@title</strong> | Şöbə: <strong>@dept</strong>. Kurslarınız üzrə davamiyyət və qiymətləndirməni həyata keçirə bilərsiniz.</span>
+                        }
+                        else if (role == "Student")
+                        {
+                            var stNum = User.FindFirst("StudentNumber")?.Value ?? "-";
+                            var year = User.FindFirst("AcademicYear")?.Value ?? "-";
+                            var prog = User.FindFirst("ProgrammeName")?.Value ?? "İxtisas";
+                            <span>Tələbə No: <strong>@stNum</strong> | İxtisas: <strong>@prog</strong> | Kurs: <strong>@year-ci kurs</strong>. Kurslarınıza, davamiyyətinizə və qiymətlərinizə baxa bilərsiniz.</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        @if (role == "Admin")
+        {
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 border-start border-primary border-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-primary"><i class="bi bi-diagram-3 me-2"></i>Akademik Struktur (F8)</h5>
+                        <p class="card-text text-muted">Şöbələr (Departments), Proqramlar (Programmes) və Akademik Dövrlərin (Terms) idarə edilməsi.</p>
+                        <a asp-controller="Admin" asp-action="Departments" class="btn btn-outline-primary btn-sm">Şöbələrə Bax</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 border-start border-success border-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-success"><i class="bi bi-journal-bookmark me-2"></i>Kurs Kataloqu (F2)</h5>
+                        <p class="card-text text-muted">Kursların təyin edilməsi, kredit miqdarları və tədris edən müəllimlərin bölüşdürülməsi.</p>
+                        <a asp-controller="Admin" asp-action="Courses" class="btn btn-outline-success btn-sm">Kataloqa Bax</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 border-start border-warning border-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-warning"><i class="bi bi-megaphone me-2"></i>Elanlar Sistemi (F7)</h5>
+                        <p class="card-text text-muted">Bütün təhsil müəssisəsi və ya konkret kurslar üçün vacib elanların yerləşdirilməsi.</p>
+                        <a asp-controller="Announcements" asp-action="Index" class="btn btn-outline-warning btn-sm">Elanlara Bax</a>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (role == "Teacher")
+        {
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 border-start border-success border-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-success"><i class="bi bi-journal-check me-2"></i>Tədris Edilən Kurslar</h5>
+                        <p class="card-text text-muted">Sizə təhkim olunmuş fənlərin və qeydiyyatdan keçmiş tələbələrin siyahısı.</p>
+                        <a asp-controller="Teacher" asp-action="Courses" class="btn btn-outline-success btn-sm">Kurslara Keç</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 border-start border-primary border-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-primary"><i class="bi bi-check2-square me-2"></i>Davamiyyət Qeydiyyatı (F5)</h5>
+                        <p class="card-text text-muted">Hər dərs saatı üzrə tələbələrin iştirak və ya qaib durumunun qeyd edilməsi.</p>
+                        <a asp-controller="Teacher" asp-action="Attendance" class="btn btn-outline-primary btn-sm">Davamiyyətə Bax</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 border-start border-info border-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-info"><i class="bi bi-award me-2"></i>Qiymətləndirmə (F4)</h5>
+                        <p class="card-text text-muted">Aralıq və final imtahan ballarının daxil edilməsi və hərf qiymətlərinin verilməsi.</p>
+                        <a asp-controller="Teacher" asp-action="Grades" class="btn btn-outline-info btn-sm">Balları Yaz</a>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (role == "Student")
+        {
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 border-start border-info border-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-info"><i class="bi bi-person-badge me-2"></i>Akademik Profil (F1)</h5>
+                        <p class="card-text text-muted">Tələbə nömrəsi, təhsil aldığınız proqram, tədris ili və şəxsi məlumatlar.</p>
+                        <a asp-controller="Student" asp-action="Profile" class="btn btn-outline-info btn-sm">Profilə Keç</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 border-start border-primary border-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-primary"><i class="bi bi-pencil-square me-2"></i>Kurs Qeydiyyatı (F3)</h5>
+                        <p class="card-text text-muted">Aktiv semestr üzrə mövcud kursları seçmək və fənlərə yazılmaq.</p>
+                        <a asp-controller="Student" asp-action="Enrollment" class="btn btn-outline-primary btn-sm">Kursa Yazıl</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0 border-start border-success border-4">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold text-success"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Transkript & GPA (F4/F6)</h5>
+                        <p class="card-text text-muted">Fənlər üzrə qiymətlər, toplanan kreditlər, ümumi GPA və rəsmi transkript çıxarışı.</p>
+                        <a asp-controller="Student" asp-action="Transcript" class="btn btn-outline-success btn-sm">Transkriptə Bax</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="p-5 mb-4 bg-white rounded-4 shadow-sm border text-center">
+        <div class="container-fluid py-3">
+            <i class="bi bi-mortarboard-fill display-2 text-primary mb-3"></i>
+            <h1 class="display-5 fw-bold">Student Information System (SIS)</h1>
+            <p class="col-md-8 mx-auto fs-5 text-muted">
+                Təhsil müəssisələri üçün vahid akademik idarəetmə sistemi. Tələbə profili, kurs kataloqu, davamiyyət jurnalı, qiymətləndirmə, GPA və rəsmi transkriptlər.
+            </p>
+            <div class="d-inline-flex gap-2 mb-4">
+                <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-4 gap-3 fw-semibold">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Sistemə Daxil Ol
+                </a>
+            </div>
+            <hr class="my-4" />
+            <div class="row g-3 text-start justify-content-center">
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <span class="badge bg-danger mb-2">Admin Hesabı</span>
+                        <div class="small">İstifadəçi adı: <code>admin</code></div>
+                        <div class="small">Şifrə: <code>Admin123!</code></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <span class="badge bg-success mb-2">Müəllim Hesabı</span>
+                        <div class="small">İstifadəçi adı: <code>teacher.rasim</code></div>
+                        <div class="small">Şifrə: <code>Teacher123!</code></div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <span class="badge bg-info text-dark mb-2">Tələbə Hesabı</span>
+                        <div class="small">İstifadəçi adı: <code>student.aydan</code></div>
+                        <div class="small">Şifrə: <code>Student123!</code></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
