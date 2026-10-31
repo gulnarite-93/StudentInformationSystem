@@ -1,5 +1,4 @@
 using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
 using StudentInformationSystem.Web.Models;
 
@@ -16,7 +15,7 @@ namespace StudentInformationSystem.Web.Services
             _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor;
 
-            var baseUrl = configuration["ApiSettings:BaseUrl"] ?? "http://localhost:5055";
+            var baseUrl = configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7109";
             if (!baseUrl.EndsWith("/"))
             {
                 baseUrl += "/";
@@ -94,6 +93,33 @@ namespace StudentInformationSystem.Web.Services
             return JsonSerializer.Deserialize<TResult>(content, _jsonOptions);
         }
 
+        public async Task<(bool Success, TResult? Data, string? ErrorMessage)> PostWithResultAsync<TRequest, TResult>(string endpoint, TRequest data)
+        {
+            AttachJwtToken();
+            var response = await _httpClient.PostAsJsonAsync(endpoint, data);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonSerializer.Deserialize<TResult>(content, _jsonOptions);
+                return (true, result, null);
+            }
+
+            try
+            {
+                using var doc = JsonDocument.Parse(content);
+                if (doc.RootElement.TryGetProperty("message", out var msg))
+                {
+                    return (false, default, msg.GetString());
+                }
+            }
+            catch
+            {
+            }
+
+            return (false, default, "Əlavə edilərkən xəta baş verdi.");
+        }
+
         public async Task<bool> PutAsync<TRequest>(string endpoint, TRequest data)
         {
             AttachJwtToken();
@@ -101,11 +127,61 @@ namespace StudentInformationSystem.Web.Services
             return response.IsSuccessStatusCode;
         }
 
+        public async Task<(bool Success, string? ErrorMessage)> PutWithResultAsync<TRequest>(string endpoint, TRequest data)
+        {
+            AttachJwtToken();
+            var response = await _httpClient.PutAsJsonAsync(endpoint, data);
+            if (response.IsSuccessStatusCode)
+            {
+                return (true, null);
+            }
+
+            try
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(content);
+                if (doc.RootElement.TryGetProperty("message", out var msg))
+                {
+                    return (false, msg.GetString());
+                }
+            }
+            catch
+            {
+            }
+
+            return (false, "Yeniləmə zamanı xəta baş verdi.");
+        }
+
         public async Task<bool> DeleteAsync(string endpoint)
         {
             AttachJwtToken();
             var response = await _httpClient.DeleteAsync(endpoint);
             return response.IsSuccessStatusCode;
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> DeleteWithResultAsync(string endpoint)
+        {
+            AttachJwtToken();
+            var response = await _httpClient.DeleteAsync(endpoint);
+            if (response.IsSuccessStatusCode)
+            {
+                return (true, null);
+            }
+
+            try
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(content);
+                if (doc.RootElement.TryGetProperty("message", out var msg))
+                {
+                    return (false, msg.GetString());
+                }
+            }
+            catch
+            {
+            }
+
+            return (false, "Silinmə zamanı xəta baş verdi.");
         }
     }
 }

@@ -14,7 +14,11 @@ namespace StudentInformationSystem.Web
 
             // 2. HttpContext və HttpClient (API-yə müraciət üçün)
             builder.Services.AddHttpContextAccessor();
-            builder.Services.AddHttpClient<IApiService, ApiService>();
+            builder.Services.AddHttpClient<IApiService, ApiService>()
+                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+                });
 
             // 3. Cookie Autentifikasiyası (JWT token cookie daxilində saxlanılır)
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

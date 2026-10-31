@@ -28,6 +28,9 @@ namespace StudentInformationSystem.API
             builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+            builder.Services.AddScoped<IProgrammeService, ProgrammeService>();
+            builder.Services.AddScoped<ITermService, TermService>();
 
             // 3. JWT Autentifikasiyası
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");

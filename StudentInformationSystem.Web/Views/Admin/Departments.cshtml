@@ -1,0 +1,115 @@
+@model IEnumerable<StudentInformationSystem.Web.Models.DepartmentViewModel>
+@{
+    ViewData["Title"] = "Şöbələrin İdarə Edilməsi (Departments)";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1"><i class="bi bi-building text-primary me-2"></i>Şöbələr (Departments)</h2>
+        <p class="text-muted mb-0">Təhsil müəssisəsinin fakültə və akademik şöbələrinin siyahısı və idarəsi (F8).</p>
+    </div>
+    <a asp-action="CreateDepartment" class="btn btn-primary fw-semibold shadow-sm">
+        <i class="bi bi-plus-circle me-1"></i> Yeni Şöbə Əlavə Et
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-folder-x display-3 text-muted"></i>
+                <p class="text-muted mt-3">Hələ heç bir şöbə əlavə edilməyib.</p>
+                <a asp-action="CreateDepartment" class="btn btn-outline-primary btn-sm">İlk Şöbəni Əlavə Et</a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light border-bottom">
+                        <tr>
+                            <th class="ps-4">KOD</th>
+                            <th>ŞÖBƏ ADI</th>
+                            <th>TƏSVİR</th>
+                            <th class="text-center">PROQRAM SAYI</th>
+                            <th class="text-center">MÜƏLLİM SAYI</th>
+                            <th class="text-end pe-4">ƏMƏLİYYATLAR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="badge bg-secondary font-monospace px-2 py-1">@item.Code</span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark">@item.Name</span>
+                                </td>
+                                <td class="text-muted small">
+                                    @(string.IsNullOrEmpty(item.Description) ? "—" : item.Description)
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-info text-dark rounded-pill">@item.ProgrammeCount proqram</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-light text-dark border rounded-pill">@item.TeacherCount müəllim</span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a asp-action="EditDepartment" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary me-1" title="Redaktə et">
+                                        <i class="bi bi-pencil"></i> Redaktə
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@item.Id" title="Sil">
+                                        <i class="bi bi-trash"></i> Sil
+                                    </button>
+
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" id="deleteModal-@item.Id" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered text-start">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Şöbəni Sil</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p class="mb-0">
+                                                        <strong>@item.Name (@item.Code)</strong> şöbəsini silmək istədiyinizdən əminsiniz?
+                                                    </p>
+                                                    <small class="text-muted">Əgər şöbəyə bağlı təhsil proqramı və ya müəllim varsa, sistem silinməyə icazə verməyəcək.</small>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Ləğv et</button>
+                                                    <form asp-action="DeleteDepartment" asp-route-id="@item.Id" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-danger btn-sm">Təsdiq et və Sil</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
