@@ -1,0 +1,48 @@
+@model StudentInformationSystem.Web.Models.AssignTeacherViewModel
+@{
+    ViewData["Title"] = "Müəllim Təyinatı (F2)";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h4 class="mb-0 fw-bold text-success"><i class="bi bi-person-check-fill me-2"></i>Müəllim Təyinatı (F2)</h4>
+                <small class="text-muted">Kurs üçün mühazirəçi/tədris edən müəllimi təyin edin və ya dəyişin.</small>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-light border p-3 rounded-3 mb-4">
+                    <div class="mb-1"><span class="text-muted small">Kurs Kodu və Adı:</span></div>
+                    <h5 class="fw-bold text-primary mb-2">@Model.CourseCode - @Model.CourseName</h5>
+                    <div>
+                        <span class="text-muted small">Cari Müəllim:</span>
+                        <strong class="text-dark">@Model.CurrentTeacherName</strong>
+                    </div>
+                </div>
+
+                <form asp-action="AssignTeacher" asp-route-id="@Model.CourseId" method="post">
+                    <input type="hidden" asp-for="CourseId" />
+                    <input type="hidden" asp-for="CourseCode" />
+                    <input type="hidden" asp-for="CourseName" />
+
+                    <div class="mb-4">
+                        <label asp-for="TeacherId" class="form-label fw-semibold"></label>
+                        <select asp-for="TeacherId" asp-items="Model.TeacherList" class="form-select form-select-lg">
+                            <option value="">-- Təyinatı Ləğv Et (Müəllimsiz) --</option>
+                        </select>
+                        <small class="text-muted d-block mt-1">Siyahıdan bu fənni tədris edəcək müəllimi seçin.</small>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Courses" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Geri Qayıt
+                        </a>
+                        <button type="submit" class="btn btn-success px-4 fw-semibold">
+                            <i class="bi bi-check-circle me-1"></i> Təyinatı Təsdiq Et
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

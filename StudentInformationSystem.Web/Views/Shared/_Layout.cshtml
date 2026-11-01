@@ -34,15 +34,17 @@
                             {
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-warning" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-gear-fill me-1"></i> İdarəetmə (F8)
+                                        <i class="bi bi-gear-fill me-1"></i> İdarəetmə
                                     </a>
                                     <ul class="dropdown-menu shadow" aria-labelledby="adminDropdown">
+                                        <li><h6 class="dropdown-header text-uppercase small">Akademik Struktur (F8)</h6></li>
                                         <li><a class="dropdown-item" asp-controller="Admin" asp-action="Departments"><i class="bi bi-building me-2"></i>Şöbələr (Departments)</a></li>
                                         <li><a class="dropdown-item" asp-controller="Admin" asp-action="Programmes"><i class="bi bi-diagram-3 me-2"></i>Proqramlar (Programmes)</a></li>
                                         <li><a class="dropdown-item" asp-controller="Admin" asp-action="Terms"><i class="bi bi-calendar3 me-2"></i>Akademik Dövrlər (Terms)</a></li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Courses"><i class="bi bi-journal-bookmark me-2"></i>Kurs Kataloqu (F2)</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users"><i class="bi bi-people me-2"></i>İstifadəçilər</a></li>
+                                        <li><h6 class="dropdown-header text-uppercase small">F1 və F2 İdarəsi</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Courses"><i class="bi bi-journal-bookmark me-2"></i>Kursların İdarəsi (F2)</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Students"><i class="bi bi-people me-2"></i>Tələbələrin İdarəsi (F1)</a></li>
                                     </ul>
                                 </li>
                             }
@@ -89,6 +91,13 @@
                                     </a>
                                 </li>
                             }
+
+                            <!-- Hamı üçün Kurs Kataloqu (F2) -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Courses" asp-action="Index">
+                                    <i class="bi bi-journal-text me-1"></i> Kurs Kataloqu (F2)
+                                </a>
+                            </li>
 
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Announcements" asp-action="Index">

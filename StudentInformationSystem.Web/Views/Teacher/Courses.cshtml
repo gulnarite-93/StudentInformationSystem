@@ -1,0 +1,106 @@
+@model IEnumerable<StudentInformationSystem.Web.Models.CourseViewModel>
+@{
+    ViewData["Title"] = "Kurslarım";
+    var teacherName = User.FindFirst("FullName")?.Value ?? User.Identity?.Name;
+}
+
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-journal-check text-success me-2"></i>Tədris Etdiyim Kurslar
+            </h2>
+            <p class="text-muted mb-0">Hörmətli <strong>@teacherName</strong>, sizə təhkim olunmuş fənlərin və qeydiyyatdan keçmiş tələbələrin siyahısı.</p>
+        </div>
+        <a asp-controller="Courses" asp-action="Index" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-journal-text me-1"></i> Ümumi Kurs Kataloqu (F2)
+        </a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="card shadow-sm border-0 rounded-4 text-center py-5">
+        <div class="card-body">
+            <i class="bi bi-journal-x display-3 text-muted"></i>
+            <h4 class="mt-3 text-dark fw-bold">Sizə hələ heç bir kurs təhkim edilməyib</h4>
+            <p class="text-muted col-md-6 mx-auto">
+                Admin tərəfindən sizə hər hansı fənn təyin edildikdə, həmin kurslar avtomatik olaraq bu səhifədə əks olunacaq.
+            </p>
+            <a asp-controller="Courses" asp-action="Index" class="btn btn-primary btn-sm mt-2">
+                <i class="bi bi-journal-text me-1"></i> Ümumi Kurs Kataloquna Bax
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var c in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 rounded-3 border-top border-success border-4">
+                    <div class="card-body d-flex flex-column p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-secondary font-monospace px-2 py-1 fs-6">@c.Code</span>
+                            <span class="badge bg-primary rounded-pill px-3 py-1">@c.Credits KREDİT</span>
+                        </div>
+
+                        <h5 class="card-title fw-bold text-dark mb-2">@c.Name</h5>
+
+                        <p class="card-text text-muted small flex-grow-1">
+                            @(string.IsNullOrEmpty(c.Description) ? "Kurs üzrə təsvir qeyd edilməyib." : c.Description)
+                        </p>
+
+                        <hr class="my-3" />
+
+                        <div class="small mb-2">
+                            <span class="text-muted"><i class="bi bi-diagram-3 me-1"></i>İxtisas:</span>
+                            <strong class="text-dark">@c.ProgrammeName</strong>
+                            @if (!string.IsNullOrEmpty(c.DepartmentName))
+                            {
+                                <div class="text-muted ms-3">(@c.DepartmentName)</div>
+                            }
+                        </div>
+
+                        <div class="small mb-2">
+                            <span class="text-muted"><i class="bi bi-calendar3 me-1"></i>Akademik Dövr:</span>
+                            <span class="badge @(c.IsTermActive ? "bg-success-subtle text-success border border-success-subtle" : "bg-light text-muted border")">
+                                @c.TermName
+                            </span>
+                        </div>
+
+                        <div class="small mb-3">
+                            <span class="text-muted"><i class="bi bi-people-fill me-1"></i>Qeydiyyatdan Keçmiş Tələbələr:</span>
+                            <span class="badge bg-info text-dark rounded-pill px-2 py-1 ms-1">
+                                @c.EnrolledStudentsCount tələbə
+                            </span>
+                        </div>
+
+                        <div class="d-grid mt-auto">
+                            <a asp-controller="Courses" asp-action="Details" asp-route-id="@c.Id" class="btn btn-outline-success btn-sm fw-semibold">
+                                <i class="bi bi-info-circle me-1"></i> Kursun Detalları
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

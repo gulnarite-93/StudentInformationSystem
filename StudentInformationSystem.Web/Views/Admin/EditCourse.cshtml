@@ -1,0 +1,83 @@
+@model StudentInformationSystem.Web.Models.CourseFormModel
+@{
+    ViewData["Title"] = "Kursu Redaktə Et (F2)";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h4 class="mb-0 fw-bold text-primary"><i class="bi bi-pencil-square me-2"></i>Kursu Redaktə Et (F2)</h4>
+                <small class="text-muted">Kurs məlumatlarını və təyinatlarını yeniləyin.</small>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="EditCourse" asp-route-id="@Model.Id" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label asp-for="Code" class="form-label fw-semibold"></label>
+                            <input asp-for="Code" class="form-control text-uppercase" />
+                            <span asp-validation-for="Code" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-5">
+                            <label asp-for="Name" class="form-label fw-semibold"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Credits" class="form-label fw-semibold"></label>
+                            <input asp-for="Credits" type="number" min="1" max="30" class="form-control" />
+                            <span asp-validation-for="Credits" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="ProgrammeId" class="form-label fw-semibold"></label>
+                            <select asp-for="ProgrammeId" asp-items="Model.ProgrammeList" class="form-select">
+                                <option value="">-- Təhsil Proqramını Seçin --</option>
+                            </select>
+                            <span asp-validation-for="ProgrammeId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="TermId" class="form-label fw-semibold"></label>
+                            <select asp-for="TermId" asp-items="Model.TermList" class="form-select">
+                                <option value="">-- Semestri Seçin --</option>
+                            </select>
+                            <span asp-validation-for="TermId" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="TeacherId" class="form-label fw-semibold"></label>
+                        <select asp-for="TeacherId" asp-items="Model.TeacherList" class="form-select">
+                            <option value="">-- Müəllim Seçin --</option>
+                        </select>
+                        <span asp-validation-for="TeacherId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Description" class="form-label fw-semibold"></label>
+                        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Courses" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Geri Qayıt
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="bi bi-check-circle me-1"></i> Dəyişiklikləri Saxla
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

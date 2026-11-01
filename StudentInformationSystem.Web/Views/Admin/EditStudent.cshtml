@@ -1,0 +1,111 @@
+@model StudentInformationSystem.Web.Models.StudentFormModel
+@{
+    ViewData["Title"] = "Tələbəni Redaktə Et (F1)";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h4 class="mb-0 fw-bold text-primary"><i class="bi bi-pencil-square me-2"></i>Tələbə Profilini Redaktə Et (F1)</h4>
+                <small class="text-muted">Tələbə məlumatlarını və akademik təyinatını yeniləyin.</small>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="EditStudent" asp-route-id="@Model.Id" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="Username" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                    <div class="alert alert-light border d-flex align-items-center mb-4">
+                        <i class="bi bi-person-circle fs-3 text-primary me-3"></i>
+                        <div>
+                            <span class="text-muted small">İstifadəçi adı:</span>
+                            <strong class="d-block text-dark">@@@Model.Username</strong>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-secondary border-bottom pb-2 mb-3"><i class="bi bi-person-badge me-1"></i> Şəxsi Məlumatlar</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="FirstName" class="form-label fw-semibold"></label>
+                            <input asp-for="FirstName" class="form-control" />
+                            <span asp-validation-for="FirstName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="LastName" class="form-label fw-semibold"></label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="PhoneNumber" class="form-label fw-semibold"></label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DateOfBirth" class="form-label fw-semibold"></label>
+                            <input asp-for="DateOfBirth" class="form-control" />
+                            <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-secondary border-bottom pb-2 my-3"><i class="bi bi-mortarboard me-1"></i> Akademik Məlumatlar</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="StudentNumber" class="form-label fw-semibold"></label>
+                            <input asp-for="StudentNumber" class="form-control text-uppercase" />
+                            <span asp-validation-for="StudentNumber" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="AcademicYear" class="form-label fw-semibold"></label>
+                            <select asp-for="AcademicYear" class="form-select">
+                                <option value="1">1-ci kurs</option>
+                                <option value="2">2-ci kurs</option>
+                                <option value="3">3-cü kurs</option>
+                                <option value="4">4-cü kurs</option>
+                            </select>
+                            <span asp-validation-for="AcademicYear" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ProgrammeId" class="form-label fw-semibold"></label>
+                        <select asp-for="ProgrammeId" asp-items="Model.ProgrammeList" class="form-select">
+                            <option value="">-- Təhsil Proqramını Seçin --</option>
+                        </select>
+                        <span asp-validation-for="ProgrammeId" class="text-danger small"></span>
+                    </div>
+
+                    <h6 class="fw-bold text-secondary border-bottom pb-2 my-3"><i class="bi bi-shield-lock me-1"></i> Hesab və Şifrə</h6>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Password" class="form-label fw-semibold">Yeni Şifrə (dəyişmək istəmirsinizsə boş saxlayın)</label>
+                            <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" />
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Students" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Geri Qayıt
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="bi bi-check-circle me-1"></i> Dəyişiklikləri Saxla
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

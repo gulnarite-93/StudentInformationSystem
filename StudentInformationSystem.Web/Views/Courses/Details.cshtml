@@ -1,0 +1,83 @@
+@model StudentInformationSystem.Web.Models.CourseViewModel
+@{
+    ViewData["Title"] = $"{Model.Code} - {Model.Name}";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                <span class="badge bg-secondary font-monospace px-3 py-2 fs-6">@Model.Code</span>
+                <span class="badge bg-primary rounded-pill px-3 py-2 fs-6">@Model.Credits KREDİT</span>
+            </div>
+            <div class="card-body p-4">
+                <h3 class="fw-bold text-dark mb-3">@Model.Name</h3>
+
+                <div class="p-3 bg-light rounded-3 mb-4">
+                    <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-file-text me-1"></i> Kursun Təsviri:</h6>
+                    <p class="mb-0 text-muted">
+                        @(string.IsNullOrEmpty(Model.Description) ? "Bu kurs üçün hələ təsvir əlavə edilməyib." : Model.Description)
+                    </p>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="border p-3 rounded-3 h-100">
+                            <span class="text-muted small d-block">Tədris Edildiyi İxtisas:</span>
+                            <strong class="text-dark fs-5">@Model.ProgrammeName</strong>
+                            <div class="text-muted small mt-1">Şöbə: @Model.DepartmentName</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border p-3 rounded-3 h-100">
+                            <span class="text-muted small d-block">Akademik Dövr:</span>
+                            <strong class="text-dark fs-5">@Model.TermName</strong>
+                            <div class="mt-1">
+                                @if (Model.IsTermActive)
+                                {
+                                    <span class="badge bg-success-subtle text-success">Cari Aktiv Semestr</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary">Qeyri-aktiv</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border p-3 rounded-3 mb-4">
+                    <span class="text-muted small d-block">Təhkim Olunmuş Müəllim:</span>
+                    @if (!string.IsNullOrEmpty(Model.TeacherName))
+                    {
+                        <div class="d-flex align-items-center mt-2">
+                            <i class="bi bi-person-circle fs-2 text-success me-3"></i>
+                            <div>
+                                <strong class="text-dark fs-5">@(Model.TeacherTitle ?? "") @Model.TeacherName</strong>
+                                <small class="text-muted d-block">Mühazirəçi / Tədris Rəhbəri</small>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="text-warning fw-semibold mt-1 d-block">
+                            <i class="bi bi-exclamation-circle me-1"></i> Bu kurs üçün hələ müəllim təyin olunmayıb.
+                        </span>
+                    }
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a asp-controller="Courses" asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Kataloqa Qayıt
+                    </a>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Admin" asp-action="EditCourse" asp-route-id="@Model.Id" class="btn btn-primary">
+                            <i class="bi bi-pencil me-1"></i> Kursu Redaktə Et
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

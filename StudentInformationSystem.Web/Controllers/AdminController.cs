@@ -334,5 +334,351 @@ namespace StudentInformationSystem.Web.Controllers
         }
 
         #endregion
+
+        #region 4. Tələbələr (F1: Students)
+
+        [HttpGet]
+        public async Task<IActionResult> Students(string? search = null, int? programmeId = null, int? academicYear = null)
+        {
+            var queryParams = new List<string>();
+            if (!string.IsNullOrWhiteSpace(search)) queryParams.Add($"search={Uri.EscapeDataString(search.Trim())}");
+            if (programmeId.HasValue && programmeId.Value > 0) queryParams.Add($"programmeId={programmeId.Value}");
+            if (academicYear.HasValue && academicYear.Value > 0) queryParams.Add($"academicYear={academicYear.Value}");
+
+            var endpoint = "api/students" + (queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "");
+            var list = await _apiService.GetAsync<List<StudentViewModel>>(endpoint) ?? new List<StudentViewModel>();
+
+            var programmes = await _apiService.GetAsync<List<ProgrammeViewModel>>("api/programmes") ?? new List<ProgrammeViewModel>();
+            ViewBag.Programmes = programmes;
+            ViewBag.CurrentSearch = search;
+            ViewBag.CurrentProgrammeId = programmeId;
+            ViewBag.CurrentAcademicYear = academicYear;
+
+            return View(list);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateStudent()
+        {
+            var model = new StudentFormModel();
+            await PopulateStudentProgrammesSelectList(model);
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateStudent(StudentFormModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.Password))
+            {
+                ModelState.AddModelError(nameof(model.Password), "Yeni tələbə üçün şifrə mütləq daxil edilməlidir.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await PopulateStudentProgrammesSelectList(model);
+                return View(model);
+            }
+
+            var (success, _, error) = await _apiService.PostWithResultAsync<StudentFormModel, StudentViewModel>("api/students", model);
+            if (!success)
+            {
+                ModelState.AddModelError(string.Empty, error ?? "Tələbə əlavə edilərkən xəta baş verdi.");
+                await PopulateStudentProgrammesSelectList(model);
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = $"Tələbə '{model.FirstName} {model.LastName}' uğurla əlavə edildi.";
+            return RedirectToAction(nameof(Students));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditStudent(int id)
+        {
+            var student = await _apiService.GetAsync<StudentViewModel>($"api/students/{id}");
+            if (student == null)
+            {
+                TempData["ErrorMessage"] = "Tələbə tapılmadı.";
+                return RedirectToAction(nameof(Students));
+            }
+
+            var formModel = new StudentFormModel
+            {
+                Id = student.Id,
+                Username = student.Username,
+                Email = student.Email,
+                FirstName = student.FirstName,
+                LastName = student.LastName,
+                StudentNumber = student.StudentNumber ?? string.Empty,
+                PhoneNumber = student.PhoneNumber,
+                DateOfBirth = student.DateOfBirth,
+                AcademicYear = student.AcademicYear ?? 1,
+                ProgrammeId = student.ProgrammeId ?? 0
+            };
+
+            await PopulateStudentProgrammesSelectList(formModel);
+            return View(formModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditStudent(int id, StudentFormModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                await PopulateStudentProgrammesSelectList(model);
+                return View(model);
+            }
+
+            var updatePayload = new
+            {
+                Email = model.Email,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                StudentNumber = model.StudentNumber,
+                PhoneNumber = model.PhoneNumber,
+                DateOfBirth = model.DateOfBirth,
+                AcademicYear = model.AcademicYear,
+                ProgrammeId = model.ProgrammeId,
+                NewPassword = model.Password
+            };
+
+            var (success, error) = await _apiService.PutWithResultAsync($"api/students/{id}", updatePayload);
+            if (!success)
+            {
+                ModelState.AddModelError(string.Empty, error ?? "Tələbə yenilənərkən xəta baş verdi.");
+                await PopulateStudentProgrammesSelectList(model);
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = $"Tələbə '{model.FirstName} {model.LastName}' uğurla yeniləndi.";
+            return RedirectToAction(nameof(Students));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteStudent(int id)
+        {
+            var (success, error) = await _apiService.DeleteWithResultAsync($"api/students/{id}");
+            if (!success)
+            {
+                TempData["ErrorMessage"] = error ?? "Tələbə silinə bilmədi.";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Tələbə uğurla silindi.";
+            }
+
+            return RedirectToAction(nameof(Students));
+        }
+
+        private async Task PopulateStudentProgrammesSelectList(StudentFormModel model)
+        {
+            var progs = await _apiService.GetAsync<List<ProgrammeViewModel>>("api/programmes") ?? new List<ProgrammeViewModel>();
+            model.ProgrammeList = progs.Select(p => new SelectListItem
+            {
+                Value = p.Id.ToString(),
+                Text = $"{p.Name} ({p.DepartmentName})"
+            }).ToList();
+        }
+
+        #endregion
+
+        #region 5. Kurs Kataloqu və İdarəsi (F2: Courses)
+
+        [HttpGet]
+        public async Task<IActionResult> Courses(string? search = null, int? termId = null, int? programmeId = null, int? teacherId = null)
+        {
+            var queryParams = new List<string>();
+            if (!string.IsNullOrWhiteSpace(search)) queryParams.Add($"search={Uri.EscapeDataString(search.Trim())}");
+            if (termId.HasValue && termId.Value > 0) queryParams.Add($"termId={termId.Value}");
+            if (programmeId.HasValue && programmeId.Value > 0) queryParams.Add($"programmeId={programmeId.Value}");
+            if (teacherId.HasValue && teacherId.Value > 0) queryParams.Add($"teacherId={teacherId.Value}");
+
+            var endpoint = "api/courses" + (queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "");
+            var list = await _apiService.GetAsync<List<CourseViewModel>>(endpoint) ?? new List<CourseViewModel>();
+
+            var terms = await _apiService.GetAsync<List<TermViewModel>>("api/terms") ?? new List<TermViewModel>();
+            var programmes = await _apiService.GetAsync<List<ProgrammeViewModel>>("api/programmes") ?? new List<ProgrammeViewModel>();
+            var teachers = await _apiService.GetAsync<List<TeacherSelectItem>>("api/courses/teachers") ?? new List<TeacherSelectItem>();
+
+            ViewBag.Terms = terms;
+            ViewBag.Programmes = programmes;
+            ViewBag.Teachers = teachers;
+            ViewBag.CurrentSearch = search;
+            ViewBag.CurrentTermId = termId;
+            ViewBag.CurrentProgrammeId = programmeId;
+            ViewBag.CurrentTeacherId = teacherId;
+
+            return View(list);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CreateCourse()
+        {
+            var model = new CourseFormModel();
+            await PopulateCourseSelectLists(model);
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateCourse(CourseFormModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                await PopulateCourseSelectLists(model);
+                return View(model);
+            }
+
+            var (success, _, error) = await _apiService.PostWithResultAsync<CourseFormModel, CourseViewModel>("api/courses", model);
+            if (!success)
+            {
+                ModelState.AddModelError(string.Empty, error ?? "Kurs əlavə edilərkən xəta baş verdi.");
+                await PopulateCourseSelectLists(model);
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = $"'{model.Name}' kursu uğurla əlavə edildi.";
+            return RedirectToAction(nameof(Courses));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditCourse(int id)
+        {
+            var course = await _apiService.GetAsync<CourseViewModel>($"api/courses/{id}");
+            if (course == null)
+            {
+                TempData["ErrorMessage"] = "Kurs tapılmadı.";
+                return RedirectToAction(nameof(Courses));
+            }
+
+            var formModel = new CourseFormModel
+            {
+                Id = course.Id,
+                Code = course.Code,
+                Name = course.Name,
+                Credits = course.Credits,
+                Description = course.Description,
+                ProgrammeId = course.ProgrammeId,
+                TermId = course.TermId,
+                TeacherId = course.TeacherId
+            };
+
+            await PopulateCourseSelectLists(formModel);
+            return View(formModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditCourse(int id, CourseFormModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                await PopulateCourseSelectLists(model);
+                return View(model);
+            }
+
+            var (success, error) = await _apiService.PutWithResultAsync($"api/courses/{id}", model);
+            if (!success)
+            {
+                ModelState.AddModelError(string.Empty, error ?? "Kurs yenilənərkən xəta baş verdi.");
+                await PopulateCourseSelectLists(model);
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = $"'{model.Name}' kursu uğurla yeniləndi.";
+            return RedirectToAction(nameof(Courses));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AssignTeacher(int id)
+        {
+            var course = await _apiService.GetAsync<CourseViewModel>($"api/courses/{id}");
+            if (course == null)
+            {
+                TempData["ErrorMessage"] = "Kurs tapılmadı.";
+                return RedirectToAction(nameof(Courses));
+            }
+
+            var teachers = await _apiService.GetAsync<List<TeacherSelectItem>>("api/courses/teachers") ?? new List<TeacherSelectItem>();
+
+            var model = new AssignTeacherViewModel
+            {
+                CourseId = course.Id,
+                CourseCode = course.Code,
+                CourseName = course.Name,
+                CurrentTeacherName = course.TeacherName != null ? $"{course.TeacherTitle} {course.TeacherName}".Trim() : "Təyin olunmayıb",
+                TeacherId = course.TeacherId,
+                TeacherList = teachers.Select(t => new SelectListItem
+                {
+                    Value = t.Id.ToString(),
+                    Text = $"{t.Title} {t.FullName} ({t.DepartmentName ?? "Şöbə təyin edilməyib"})"
+                }).ToList()
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignTeacher(int id, AssignTeacherViewModel model)
+        {
+            var payload = new { TeacherId = model.TeacherId };
+            var (success, error) = await _apiService.PutWithResultAsync($"api/courses/{id}/assign-teacher", payload);
+
+            if (!success)
+            {
+                TempData["ErrorMessage"] = error ?? "Müəllim təyin edilərkən xəta baş verdi.";
+                return RedirectToAction(nameof(AssignTeacher), new { id });
+            }
+
+            TempData["SuccessMessage"] = $"'{model.CourseName}' kursu üçün müəllim təyinatı uğurla yeniləndi.";
+            return RedirectToAction(nameof(Courses));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCourse(int id)
+        {
+            var (success, error) = await _apiService.DeleteWithResultAsync($"api/courses/{id}");
+            if (!success)
+            {
+                TempData["ErrorMessage"] = error ?? "Kurs silinə bilmədi.";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Kurs uğurla silindi.";
+            }
+
+            return RedirectToAction(nameof(Courses));
+        }
+
+        private async Task PopulateCourseSelectLists(CourseFormModel model)
+        {
+            var progs = await _apiService.GetAsync<List<ProgrammeViewModel>>("api/programmes") ?? new List<ProgrammeViewModel>();
+            var terms = await _apiService.GetAsync<List<TermViewModel>>("api/terms") ?? new List<TermViewModel>();
+            var teachers = await _apiService.GetAsync<List<TeacherSelectItem>>("api/courses/teachers") ?? new List<TeacherSelectItem>();
+
+            model.ProgrammeList = progs.Select(p => new SelectListItem
+            {
+                Value = p.Id.ToString(),
+                Text = $"{p.Name} ({p.DepartmentName})"
+            }).ToList();
+
+            model.TermList = terms.Select(t => new SelectListItem
+            {
+                Value = t.Id.ToString(),
+                Text = t.IsActive ? $"{t.Name} (Aktiv)" : t.Name
+            }).ToList();
+
+            model.TeacherList = teachers.Select(t => new SelectListItem
+            {
+                Value = t.Id.ToString(),
+                Text = $"{t.Title} {t.FullName} ({t.DepartmentName ?? "Şöbə təyin edilməyib"})"
+            }).ToList();
+        }
+
+        #endregion
     }
 }

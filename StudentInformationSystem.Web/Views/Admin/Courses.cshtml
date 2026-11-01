@@ -1,0 +1,188 @@
+@model IEnumerable<StudentInformationSystem.Web.Models.CourseViewModel>
+@{
+    ViewData["Title"] = "Kursların İdarə Edilməsi (F2)";
+    var terms = ViewBag.Terms as List<StudentInformationSystem.Web.Models.TermViewModel> ?? new();
+    var programmes = ViewBag.Programmes as List<StudentInformationSystem.Web.Models.ProgrammeViewModel> ?? new();
+    var teachers = ViewBag.Teachers as List<StudentInformationSystem.Web.Models.TeacherSelectItem> ?? new();
+    string? currentSearch = ViewBag.CurrentSearch as string;
+    int? currentTermId = ViewBag.CurrentTermId as int?;
+    int? currentProgrammeId = ViewBag.CurrentProgrammeId as int?;
+    int? currentTeacherId = ViewBag.CurrentTeacherId as int?;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1"><i class="bi bi-journal-bookmark-fill text-primary me-2"></i>Kurs Kataloqu və İdarəsi (F2)</h2>
+        <p class="text-muted mb-0">Kursların yaradılması, kreditlər, müəllim təyinatı və akademik dövrlər üzrə bölüşdürülməsi.</p>
+    </div>
+    <a asp-action="CreateCourse" class="btn btn-primary fw-semibold shadow-sm">
+        <i class="bi bi-plus-circle me-1"></i> Yeni Kurs Əlavə Et
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+    </div>
+}
+
+<!-- Filtrlər -->
+<div class="card shadow-sm border-0 mb-4 rounded-3">
+    <div class="card-body p-3">
+        <form asp-action="Courses" method="get" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="search" value="@currentSearch" class="form-control" placeholder="Kurs adı və ya kodu ilə axtar..." />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="termId" class="form-select">
+                    <option value="">-- Bütün Semestrlər --</option>
+                    @foreach (var t in terms)
+                    {
+                        <option value="@t.Id" selected="@(currentTermId == t.Id)">@t.Name @(t.IsActive ? "(Aktiv)" : "")</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="programmeId" class="form-select">
+                    <option value="">-- Bütün İxtisaslar --</option>
+                    @foreach (var p in programmes)
+                    {
+                        <option value="@p.Id" selected="@(currentProgrammeId == p.Id)">@p.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                    <i class="bi bi-funnel me-1"></i> Filtrlə
+                </button>
+                @if (!string.IsNullOrEmpty(currentSearch) || currentTermId.HasValue || currentProgrammeId.HasValue || currentTeacherId.HasValue)
+                {
+                    <a asp-action="Courses" class="btn btn-outline-secondary" title="Sıfırla">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Kurslar Cədvəli -->
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-journal-x display-3 text-muted"></i>
+                <p class="text-muted mt-3">Heç bir kurs tapılmadı.</p>
+                <a asp-action="CreateCourse" class="btn btn-outline-primary btn-sm">İlk Kursu Əlavə Et</a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light border-bottom">
+                        <tr>
+                            <th class="ps-4">KOD</th>
+                            <th>KURS ADI</th>
+                            <th class="text-center">KREDİT</th>
+                            <th>İXTİSAS & ŞÖBƏ</th>
+                            <th>SEMƏSTR</th>
+                            <th>TƏYİN OLUNMUŞ MÜƏLLİM</th>
+                            <th class="text-end pe-4">ƏMƏLİYYATLAR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="badge bg-secondary font-monospace px-2 py-1">@c.Code</span>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">@c.Name</div>
+                                    <small class="text-muted">@(string.IsNullOrEmpty(c.Description) ? "" : (c.Description.Length > 50 ? c.Description.Substring(0, 47) + "..." : c.Description))</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary rounded-pill px-3 py-1 fs-6">@c.Credits</span>
+                                </td>
+                                <td>
+                                    <div class="text-dark fw-semibold">@c.ProgrammeName</div>
+                                    <small class="text-muted">@c.DepartmentName</small>
+                                </td>
+                                <td>
+                                    <span class="badge @(c.IsTermActive ? "bg-success-subtle text-success border border-success-subtle" : "bg-light text-muted border")">
+                                        @c.TermName
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(c.TeacherName))
+                                    {
+                                        <div class="text-dark fw-semibold">
+                                            <i class="bi bi-person-video3 text-success me-1"></i>@(c.TeacherTitle ?? "") @c.TeacherName
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                            <i class="bi bi-person-dash me-1"></i> Təyin edilməyib
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a asp-action="AssignTeacher" asp-route-id="@c.Id" class="btn btn-sm btn-outline-success me-1" title="Müəllim təyin et">
+                                        <i class="bi bi-person-check"></i> Müəllim
+                                    </a>
+                                    <a asp-action="EditCourse" asp-route-id="@c.Id" class="btn btn-sm btn-outline-primary me-1" title="Redaktə et">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteCourseModal-@c.Id" title="Sil">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" id="deleteCourseModal-@c.Id" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered text-start">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Kursu Sil</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bağla"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p class="mb-0">
+                                                        <strong>@c.Code - @c.Name</strong> kursunu silmək istədiyinizdən əminsiniz?
+                                                    </p>
+                                                    <small class="text-muted">Əgər kursa yazılmış tələbə və ya dərs davamiyyəti varsa, sistem silinməyə icazə verməyəcək.</small>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Ləğv et</button>
+                                                    <form asp-action="DeleteCourse" asp-route-id="@c.Id" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-danger btn-sm">Təsdiq et və Sil</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

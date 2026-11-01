@@ -1,0 +1,100 @@
+@model StudentInformationSystem.Web.Models.StudentProfileViewModel
+@{
+    ViewData["Title"] = "Akademik Profilim (F1)";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-9">
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
+            <div class="bg-primary text-white p-4 p-md-5 position-relative">
+                <div class="d-flex flex-column flex-md-row align-items-md-center gap-4">
+                    <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center shadow" style="width: 100px; height: 100px; font-size: 2.8rem;">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-warning text-dark px-3 py-1 font-monospace fw-bold">@(Model.StudentNumber ?? "ST-YENİ")</span>
+                            <span class="badge bg-white text-primary px-3 py-1 fw-bold">@(Model.AcademicYear.HasValue ? $"{Model.AcademicYear}-ci Kurs Tələbəsi" : "Tələbə")</span>
+                        </div>
+                        <h2 class="fw-bold mb-1">@Model.FullName</h2>
+                        <div class="opacity-75">
+                            <i class="bi bi-envelope me-1"></i>@Model.Email | <i class="bi bi-person me-1"></i>@@@Model.Username
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-4 p-md-5 bg-white">
+                <h5 class="fw-bold text-dark border-bottom pb-2 mb-4">
+                    <i class="bi bi-info-circle-fill text-primary me-2"></i>Akademik və Şəxsi Məlumatlar
+                </h5>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 h-100 border">
+                            <small class="text-muted text-uppercase fw-semibold d-block">Təhsil Proqramı (İxtisas)</small>
+                            <span class="fs-5 fw-bold text-primary d-block mt-1">@(Model.ProgrammeName ?? "Təyin olunmayıb")</span>
+                            <small class="text-muted mt-1 d-block">Fakültə / Şöbə: @(Model.DepartmentName ?? "—")</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 h-100 border">
+                            <small class="text-muted text-uppercase fw-semibold d-block">Tələbə Nömrəsi (ST ID)</small>
+                            <span class="fs-5 fw-bold font-monospace text-dark d-block mt-1">@(Model.StudentNumber ?? "—")</span>
+                            <small class="text-muted mt-1 d-block">Akademik Tədris İli: @(Model.AcademicYear.HasValue ? $"{Model.AcademicYear}-ci kurs" : "—")</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <small class="text-muted text-uppercase fw-semibold d-block">Əlaqə Telefonu</small>
+                            <div class="fs-6 fw-semibold text-dark mt-1">
+                                <i class="bi bi-telephone-fill text-success me-2"></i>@(string.IsNullOrEmpty(Model.PhoneNumber) ? "Qeyd edilməyib" : Model.PhoneNumber)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <small class="text-muted text-uppercase fw-semibold d-block">Doğum Tarixi</small>
+                            <div class="fs-6 fw-semibold text-dark mt-1">
+                                <i class="bi bi-calendar-heart text-danger me-2"></i>@(Model.DateOfBirth.HasValue ? Model.DateOfBirth.Value.ToString("dd MMMM yyyy") : "Qeyd edilməyib")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <small class="text-muted text-uppercase fw-semibold d-block">Sistemə Qeydiyyat Tarixi</small>
+                            <div class="fs-6 fw-semibold text-dark mt-1">
+                                <i class="bi bi-clock-history text-muted me-2"></i>@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <small class="text-muted text-uppercase fw-semibold d-block">Qeydiyyatdan Keçilmiş Kurslar</small>
+                            <div class="fs-6 fw-semibold text-dark mt-1">
+                                <i class="bi bi-journal-check text-primary me-2"></i>@Model.EnrolledCoursesCount fənn
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-house me-1"></i> Əsas Səhifə
+                    </a>
+                    <a asp-controller="Courses" asp-action="Index" class="btn btn-primary fw-semibold">
+                        <i class="bi bi-journal-text me-1"></i> Kurs Kataloquna Bax (F2)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

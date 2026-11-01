@@ -299,6 +299,9 @@ namespace StudentInformationSystem.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("DepartmentId")
                         .HasColumnType("int");
 
@@ -316,6 +319,9 @@ namespace StudentInformationSystem.API.Migrations
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ProgrammeId")
