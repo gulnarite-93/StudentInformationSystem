@@ -13,7 +13,25 @@ namespace StudentInformationSystem.API.Data
 
             if (await context.Users.AnyAsync())
             {
-                return; // Əgər artıq istifadəçi varsa, seed etməyə ehtiyac yoxdur
+                // Əgər bazada istifadəçilər artıq varsa, lakin hələ qeydiyyatlar yoxdursa, ilkin qeydiyyatları əlavə edirik
+                if (!await context.Enrollments.AnyAsync() && await context.Courses.AnyAsync())
+                {
+                    var s1 = await context.Users.FirstOrDefaultAsync(u => u.Username == "student.aydan");
+                    var s2 = await context.Users.FirstOrDefaultAsync(u => u.Username == "student.elmir");
+                    var c1 = await context.Courses.FirstOrDefaultAsync(c => c.Code == "IT101");
+                    var c2 = await context.Courses.FirstOrDefaultAsync(c => c.Code == "IT102");
+
+                    if (s1 != null && s2 != null && c1 != null && c2 != null)
+                    {
+                        await context.Enrollments.AddRangeAsync(
+                            new Enrollment { StudentId = s1.Id, CourseId = c1.Id, EnrollmentDate = DateTime.UtcNow, Status = "Enrolled" },
+                            new Enrollment { StudentId = s1.Id, CourseId = c2.Id, EnrollmentDate = DateTime.UtcNow, Status = "Enrolled" },
+                            new Enrollment { StudentId = s2.Id, CourseId = c2.Id, EnrollmentDate = DateTime.UtcNow, Status = "Enrolled" }
+                        );
+                        await context.SaveChangesAsync();
+                    }
+                }
+                return;
             }
 
             // 1. Şöbələr (Departments)
@@ -185,7 +203,15 @@ namespace StudentInformationSystem.API.Data
             await context.Courses.AddRangeAsync(course1, course2, course3);
             await context.SaveChangesAsync();
 
-            // 6. İlkin Elan (Ümumi müəssisə üzrə)
+            // 6. İlkin Tələbə Qeydiyyatları (Enrollments)
+            var enr1 = new Enrollment { StudentId = student1.Id, CourseId = course1.Id, EnrollmentDate = DateTime.UtcNow, Status = "Enrolled" };
+            var enr2 = new Enrollment { StudentId = student1.Id, CourseId = course2.Id, EnrollmentDate = DateTime.UtcNow, Status = "Enrolled" };
+            var enr3 = new Enrollment { StudentId = student2.Id, CourseId = course2.Id, EnrollmentDate = DateTime.UtcNow, Status = "Enrolled" };
+
+            await context.Enrollments.AddRangeAsync(enr1, enr2, enr3);
+            await context.SaveChangesAsync();
+
+            // 7. İlkin Elan (Ümumi müəssisə üzrə)
             var announcement = new Announcement
             {
                 Title = "Yeni Tədris İliniz Mübarək!",

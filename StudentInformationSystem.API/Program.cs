@@ -33,6 +33,7 @@ namespace StudentInformationSystem.API
             builder.Services.AddScoped<ITermService, TermService>();
             builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddScoped<ICourseService, CourseService>();
+            builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 
             // 3. JWT Autentifikasiyası
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");

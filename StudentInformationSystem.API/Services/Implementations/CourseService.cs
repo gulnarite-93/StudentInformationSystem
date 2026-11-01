@@ -83,7 +83,7 @@ namespace StudentInformationSystem.API.Services.Implementations
                     TeacherId = c.TeacherId,
                     TeacherName = c.Teacher != null ? $"{c.Teacher.FirstName} {c.Teacher.LastName}".Trim() : null,
                     TeacherTitle = c.Teacher != null ? c.Teacher.Title : null,
-                    EnrolledStudentsCount = c.Enrollments.Count
+                    EnrolledStudentsCount = c.Enrollments.Count(e => e.Status == "Enrolled")
                 })
                 .ToListAsync();
         }
@@ -113,7 +113,7 @@ namespace StudentInformationSystem.API.Services.Implementations
                     TeacherId = c.TeacherId,
                     TeacherName = c.Teacher != null ? $"{c.Teacher.FirstName} {c.Teacher.LastName}".Trim() : null,
                     TeacherTitle = c.Teacher != null ? c.Teacher.Title : null,
-                    EnrolledStudentsCount = c.Enrollments.Count
+                    EnrolledStudentsCount = c.Enrollments.Count(e => e.Status == "Enrolled")
                 })
                 .FirstOrDefaultAsync();
         }

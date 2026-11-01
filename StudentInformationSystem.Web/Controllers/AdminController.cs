@@ -680,5 +680,97 @@ namespace StudentInformationSystem.Web.Controllers
         }
 
         #endregion
+
+        #region F3: Kurs Qeydiyyatı İdarəsi (Admin)
+
+        [HttpGet]
+        public async Task<IActionResult> StudentEnrollments(int studentId)
+        {
+            var student = await _apiService.GetAsync<StudentViewModel>($"api/students/{studentId}");
+            if (student == null)
+            {
+                TempData["ErrorMessage"] = "Tələbə tapılmadı.";
+                return RedirectToAction(nameof(Students));
+            }
+
+            var enrollments = await _apiService.GetAsync<List<EnrollmentViewModel>>($"api/enrollments/student/{studentId}")
+                ?? new List<EnrollmentViewModel>();
+
+            var allCourses = await _apiService.GetAsync<List<CourseViewModel>>("api/courses")
+                ?? new List<CourseViewModel>();
+
+            var model = new AdminStudentEnrollmentsViewModel
+            {
+                Student = student,
+                Enrollments = enrollments,
+                AvailableCourses = allCourses
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdminEnrollStudent(int studentId, int courseId)
+        {
+            var (success, _, error) = await _apiService.PostWithResultAsync<object, EnrollmentViewModel>(
+                "api/enrollments/enroll",
+                new { StudentId = studentId, CourseId = courseId });
+
+            if (success)
+            {
+                TempData["SuccessMessage"] = "Tələbə kursa uğurla əlavə edildi.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = error ?? "Tələbə kursa əlavə edilərkən xəta baş verdi.";
+            }
+
+            return RedirectToAction(nameof(StudentEnrollments), new { studentId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdminDropStudent(int enrollmentId, int studentId)
+        {
+            var (success, _, error) = await _apiService.PostWithResultAsync<object, object>(
+                $"api/enrollments/{enrollmentId}/drop",
+                new { });
+
+            if (success)
+            {
+                TempData["SuccessMessage"] = "Tələbənin kurs qeydiyyatı ləğv edildi (çıxarıldı).";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = error ?? "Qeydiyyat ləğv edilərkən xəta baş verdi.";
+            }
+
+            return RedirectToAction(nameof(StudentEnrollments), new { studentId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CourseStudents(int courseId)
+        {
+            var course = await _apiService.GetAsync<CourseViewModel>($"api/courses/{courseId}");
+            if (course == null)
+            {
+                TempData["ErrorMessage"] = "Kurs tapılmadı.";
+                return RedirectToAction(nameof(Courses));
+            }
+
+            var students = await _apiService.GetAsync<List<EnrolledStudentViewModel>>($"api/enrollments/course/{courseId}")
+                ?? new List<EnrolledStudentViewModel>();
+
+            var model = new CourseStudentsViewModel
+            {
+                Course = course,
+                Students = students
+            };
+
+            return View(model);
+        }
+
+        #endregion
     }
 }
