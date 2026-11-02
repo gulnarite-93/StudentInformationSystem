@@ -8,8 +8,26 @@ namespace StudentInformationSystem.API.Data
     {
         public static async Task SeedAsync(AppDbContext context, IPasswordHasher passwordHasher)
         {
-            // Baza cədvəllərinin mövcudluğunu və miqrasiyaların tətbiqini təmin edirik
+            // 1. Baza cədvəllərinin mövcudluğunu və miqrasiyaların tətbiqini təmin edirik
             await context.Database.MigrateAsync();
+
+            // 2. Attendances cədvəlində Status sütununun mövcudluğunu birbaşa SQL ilə zəmanətə alırıq
+            try
+            {
+                await context.Database.ExecuteSqlRawAsync(@"
+                    IF NOT EXISTS (
+                        SELECT 1 FROM sys.columns 
+                        WHERE object_id = OBJECT_ID('Attendances') AND name = 'Status'
+                    )
+                    BEGIN
+                        ALTER TABLE Attendances ADD [Status] nvarchar(max) NOT NULL CONSTRAINT DF_Attendances_Status DEFAULT 'Present';
+                    END
+                ");
+            }
+            catch
+            {
+                // Digər provider və ya məhdud hüquqlar zamanı səssiz davam et
+            }
 
             if (await context.Users.AnyAsync())
             {
@@ -31,6 +49,29 @@ namespace StudentInformationSystem.API.Data
                         await context.SaveChangesAsync();
                     }
                 }
+
+                // İlkin davamiyyət qeydləri
+                if (!await context.Attendances.AnyAsync() && await context.Courses.AnyAsync())
+                {
+                    var s1 = await context.Users.FirstOrDefaultAsync(u => u.Username == "student.aydan");
+                    var s2 = await context.Users.FirstOrDefaultAsync(u => u.Username == "student.elmir");
+                    var c2 = await context.Courses.FirstOrDefaultAsync(c => c.Code == "IT102");
+
+                    if (s1 != null && s2 != null && c2 != null)
+                    {
+                        var d1 = DateTime.Today.AddDays(-7);
+                        var d2 = DateTime.Today.AddDays(-2);
+
+                        await context.Attendances.AddRangeAsync(
+                            new Attendance { CourseId = c2.Id, StudentId = s1.Id, LessonDate = d1, LessonTopic = "1-ci Mühazirə: Giriş və SQL Əsasları", Status = AttendanceStatus.Present, IsPresent = true },
+                            new Attendance { CourseId = c2.Id, StudentId = s2.Id, LessonDate = d1, LessonTopic = "1-ci Mühazirə: Giriş və SQL Əsasları", Status = AttendanceStatus.Present, IsPresent = true },
+                            new Attendance { CourseId = c2.Id, StudentId = s1.Id, LessonDate = d2, LessonTopic = "2-ci Mühazirə: DDL və DML Əmrləri", Status = AttendanceStatus.Present, IsPresent = true },
+                            new Attendance { CourseId = c2.Id, StudentId = s2.Id, LessonDate = d2, LessonTopic = "2-ci Mühazirə: DDL və DML Əmrləri", Status = AttendanceStatus.Absent, IsPresent = false, Note = "Xəbərdarlıqsız gəlməyib" }
+                        );
+                        await context.SaveChangesAsync();
+                    }
+                }
+
                 return;
             }
 
@@ -211,7 +252,19 @@ namespace StudentInformationSystem.API.Data
             await context.Enrollments.AddRangeAsync(enr1, enr2, enr3);
             await context.SaveChangesAsync();
 
-            // 7. İlkin Elan (Ümumi müəssisə üzrə)
+            // 7. İlkin Davamiyyət (Attendance)
+            var lessonDate1 = DateTime.Today.AddDays(-7);
+            var lessonDate2 = DateTime.Today.AddDays(-2);
+
+            await context.Attendances.AddRangeAsync(
+                new Attendance { CourseId = course2.Id, StudentId = student1.Id, LessonDate = lessonDate1, LessonTopic = "1-ci Mühazirə: Giriş və SQL Əsasları", Status = AttendanceStatus.Present, IsPresent = true },
+                new Attendance { CourseId = course2.Id, StudentId = student2.Id, LessonDate = lessonDate1, LessonTopic = "1-ci Mühazirə: Giriş və SQL Əsasları", Status = AttendanceStatus.Present, IsPresent = true },
+                new Attendance { CourseId = course2.Id, StudentId = student1.Id, LessonDate = lessonDate2, LessonTopic = "2-ci Mühazirə: DDL və DML Əmrləri", Status = AttendanceStatus.Present, IsPresent = true },
+                new Attendance { CourseId = course2.Id, StudentId = student2.Id, LessonDate = lessonDate2, LessonTopic = "2-ci Mühazirə: DDL və DML Əmrləri", Status = AttendanceStatus.Absent, IsPresent = false, Note = "Xəbərdarlıqsız gəlməyib" }
+            );
+            await context.SaveChangesAsync();
+
+            // 8. İlkin Elan (Ümumi müəssisə üzrə)
             var announcement = new Announcement
             {
                 Title = "Yeni Tədris İliniz Mübarək!",

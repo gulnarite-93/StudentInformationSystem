@@ -109,5 +109,20 @@ namespace StudentInformationSystem.Web.Controllers
 
             Response.Redirect(Url.Action(nameof(Enrollment))!);
         }
+
+        // F5: Tələbənin Davamiyyət Səhifəsi
+        [HttpGet]
+        public async Task<IActionResult> Attendance()
+        {
+            var summaries = await _apiService.GetAsync<List<StudentCourseAttendanceSummaryViewModel>>("api/attendance/my") 
+                ?? new List<StudentCourseAttendanceSummaryViewModel>();
+
+            var model = new StudentAttendancePageViewModel
+            {
+                Courses = summaries
+            };
+
+            return View(model);
+        }
     }
 }

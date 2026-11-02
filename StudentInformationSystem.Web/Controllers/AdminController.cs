@@ -772,5 +772,53 @@ namespace StudentInformationSystem.Web.Controllers
         }
 
         #endregion
+
+        #region F5: Davamiyyət İdarəsi (Admin)
+
+        [HttpGet]
+        public async Task<IActionResult> Attendance(int? courseId = null)
+        {
+            var courses = await _apiService.GetAsync<List<CourseViewModel>>("api/courses") ?? new List<CourseViewModel>();
+            ViewBag.Courses = courses;
+
+            int selectedCourseId = courseId ?? courses.FirstOrDefault()?.Id ?? 0;
+            ViewBag.SelectedCourseId = selectedCourseId;
+
+            var model = new TeacherCourseAttendanceOverviewViewModel();
+
+            if (selectedCourseId > 0)
+            {
+                var course = courses.FirstOrDefault(c => c.Id == selectedCourseId) 
+                    ?? await _apiService.GetAsync<CourseViewModel>($"api/courses/{selectedCourseId}");
+
+                var sessions = await _apiService.GetAsync<List<LessonSessionSummaryViewModel>>($"api/attendance/course/{selectedCourseId}/sessions")
+                    ?? new List<LessonSessionSummaryViewModel>();
+
+                if (course != null)
+                {
+                    model.Course = course;
+                    model.Sessions = sessions;
+                }
+            }
+
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AttendanceSessionDetails(int courseId, DateTime date)
+        {
+            var dateStr = date.ToString("yyyy-MM-dd");
+            var session = await _apiService.GetAsync<LessonSessionFormViewModel>($"api/attendance/course/{courseId}/session?date={dateStr}");
+
+            if (session == null)
+            {
+                TempData["ErrorMessage"] = "Dərs sessiyası tapılmadı.";
+                return RedirectToAction(nameof(Attendance), new { courseId });
+            }
+
+            return View(session);
+        }
+
+        #endregion
     }
 }

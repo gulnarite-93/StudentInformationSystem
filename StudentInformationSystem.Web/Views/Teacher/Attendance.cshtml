@@ -1,0 +1,93 @@
+@model IEnumerable<StudentInformationSystem.Web.Models.CourseViewModel>
+@{
+    ViewData["Title"] = "Davamiyyət İdarəsi";
+}
+
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-calendar-check text-primary me-2"></i>Davamiyyət Jurnalı (F5)
+            </h2>
+            <p class="text-muted mb-0">
+                Tədris etdiyiniz fənlər üzrə dərs sessiyalarının keçirilməsi və tələbələrin davamiyyətinin qeydiyyatı.
+            </p>
+        </div>
+        <a asp-action="Courses" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-journal-check me-1"></i> Kurslarım Siyahısı
+        </a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="card shadow-sm border-0 rounded-4 text-center py-5">
+        <div class="card-body">
+            <i class="bi bi-journal-x display-3 text-muted"></i>
+            <h4 class="mt-3 text-dark fw-bold">Sizə təhkim olunmuş aktiv fənn yoxdur</h4>
+            <p class="text-muted col-md-6 mx-auto">
+                Admin tərəfindən sizə hər hansı kurs təyin edildikdə, həmin fənnin davamiyyət jurnalını buradan idarə edə biləcəksiniz.
+            </p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var c in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm border-0 rounded-3 border-top border-primary border-4">
+                    <div class="card-body d-flex flex-column p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-secondary font-monospace px-2 py-1 fs-6">@c.Code</span>
+                            <span class="badge bg-primary rounded-pill px-3 py-1">@c.Credits KREDİT</span>
+                        </div>
+
+                        <h5 class="card-title fw-bold text-dark mb-2">@c.Name</h5>
+
+                        <div class="small mb-2">
+                            <span class="text-muted"><i class="bi bi-diagram-3 me-1"></i>İxtisas:</span>
+                            <strong class="text-dark">@c.ProgrammeName</strong>
+                        </div>
+
+                        <div class="small mb-2">
+                            <span class="text-muted"><i class="bi bi-calendar3 me-1"></i>Akademik Dövr:</span>
+                            <strong class="text-dark">@c.TermName</strong>
+                        </div>
+
+                        <div class="small mb-3">
+                            <span class="text-muted"><i class="bi bi-people-fill me-1"></i>Qeydiyyatda Olan Tələbələr:</span>
+                            <span class="badge bg-info text-dark rounded-pill px-2 py-1 ms-1">@c.EnrolledStudentsCount tələbə</span>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-auto">
+                            <a asp-action="AttendanceSessions" asp-route-courseId="@c.Id" class="btn btn-primary btn-sm fw-semibold">
+                                <i class="bi bi-journal-text me-1"></i> Davamiyyət Sessiyaları
+                            </a>
+                            <a asp-action="CreateAttendanceSession" asp-route-courseId="@c.Id" class="btn btn-outline-success btn-sm fw-semibold">
+                                <i class="bi bi-plus-circle me-1"></i> Yeni Dərs Sessiyası
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
