@@ -79,6 +79,7 @@ namespace StudentInformationSystem.API.Data
             modelBuilder.Entity<Grade>(entity =>
             {
                 entity.Property(g => g.MidtermScore).HasPrecision(5, 2);
+                entity.Property(g => g.AssignmentScore).HasPrecision(5, 2);
                 entity.Property(g => g.FinalScore).HasPrecision(5, 2);
                 entity.Property(g => g.TotalScore).HasPrecision(5, 2);
                 entity.Property(g => g.GradePoint).HasPrecision(4, 2);

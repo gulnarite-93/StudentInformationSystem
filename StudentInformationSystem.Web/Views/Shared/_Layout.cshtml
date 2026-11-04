@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
-    <header>
+    <header class="d-print-none">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-2">
             <div class="container">
                 <a class="navbar-brand fw-bold d-flex align-items-center" asp-controller="Home" asp-action="Index">
@@ -41,8 +41,10 @@
                                         <li><a class="dropdown-item" asp-controller="Admin" asp-action="Programmes"><i class="bi bi-diagram-3 me-2"></i>Proqramlar (Programmes)</a></li>
                                         <li><a class="dropdown-item" asp-controller="Admin" asp-action="Terms"><i class="bi bi-calendar3 me-2"></i>Akademik Dövrlər (Terms)</a></li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Courses"><i class="bi bi-journal-bookmark me-2"></i>Kurs Kataloqu (F2)</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users"><i class="bi bi-people me-2"></i>İstifadəçilər</a></li>
+                                        <li><h6 class="dropdown-header text-uppercase">Qiymətlər & Transkript (F4/F6)</h6></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="CourseGrades" asp-route-courseId="2"><i class="bi bi-award me-2"></i>Fənn Qiymətləri (IT102 Jurnalı)</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="StudentTranscript" asp-route-studentId="4"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Aydan Məmmədova Transkripti</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="StudentDashboard" asp-route-studentId="4"><i class="bi bi-speedometer2 me-2"></i>Aydan Məmmədova Paneli (GPA)</a></li>
                                     </ul>
                                 </li>
                             }
@@ -50,18 +52,8 @@
                             @if (User.IsInRole("Teacher"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-success" asp-controller="Teacher" asp-action="Courses">
-                                        <i class="bi bi-journal-check me-1"></i> Kurslarım
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Teacher" asp-action="Attendance">
-                                        <i class="bi bi-check2-square me-1"></i> Davamiyyət (F5)
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Teacher" asp-action="Grades">
-                                        <i class="bi bi-award me-1"></i> Qiymətləndirmə (F4)
+                                    <a class="nav-link text-success fw-semibold" asp-controller="Teacher" asp-action="Grades">
+                                        <i class="bi bi-award-fill me-1"></i> Qiymətləndirmə (F4)
                                     </a>
                                 </li>
                             }
@@ -69,32 +61,21 @@
                             @if (User.IsInRole("Student"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-info" asp-controller="Student" asp-action="Profile">
-                                        <i class="bi bi-person-badge me-1"></i> Profilim (F1)
+                                    <a class="nav-link text-info fw-semibold" asp-controller="Student" asp-action="Dashboard">
+                                        <i class="bi bi-speedometer2 me-1"></i> Akademik Panel (F6)
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Student" asp-action="Enrollment">
-                                        <i class="bi bi-pencil-square me-1"></i> Kursa Qeydiyyat (F3)
+                                    <a class="nav-link text-white" asp-controller="Student" asp-action="Grades">
+                                        <i class="bi bi-award me-1"></i> Qiymətlərim (F4)
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Student" asp-action="Transcript">
+                                    <a class="nav-link text-warning" asp-controller="Student" asp-action="Transcript">
                                         <i class="bi bi-file-earmark-spreadsheet me-1"></i> Transkript & GPA (F4/F6)
                                     </a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-controller="Student" asp-action="Attendance">
-                                        <i class="bi bi-calendar-check me-1"></i> Davamiyyətim (F5)
-                                    </a>
-                                </li>
                             }
-
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Announcements" asp-action="Index">
-                                    <i class="bi bi-megaphone me-1"></i> Elanlar (F7)
-                                </a>
-                            </li>
                         }
                     </ul>
 
@@ -148,7 +129,7 @@
         </main>
     </div>
 
-    <footer class="bg-white border-top py-3 mt-auto text-muted text-center small">
+    <footer class="bg-white border-top py-3 mt-auto text-muted text-center small d-print-none">
         <div class="container">
             &copy; 2026 - <strong>Student Information System</strong> | Akademik İdarəetmə Portalı
         </div>

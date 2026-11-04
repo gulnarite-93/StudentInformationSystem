@@ -334,5 +334,48 @@ namespace StudentInformationSystem.Web.Controllers
         }
 
         #endregion
+
+        #region 4. Qiymətlər və Transkript (Grades & Transcript)
+
+        [HttpGet]
+        public async Task<IActionResult> CourseGrades(int courseId)
+        {
+            var courseGrades = await _apiService.GetAsync<CourseGradesViewModel>($"api/grades/course/{courseId}");
+            if (courseGrades == null)
+            {
+                TempData["ErrorMessage"] = "Fənn tapılmadı.";
+                return RedirectToAction(nameof(Departments));
+            }
+
+            return View("~/Views/Teacher/CourseGrades.cshtml", courseGrades);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> StudentTranscript(int studentId)
+        {
+            var transcript = await _apiService.GetAsync<TranscriptViewModel>($"api/grades/transcript/student/{studentId}");
+            if (transcript == null)
+            {
+                TempData["ErrorMessage"] = "Tələbənin transkripti tapılmadı.";
+                return RedirectToAction(nameof(Departments));
+            }
+
+            return View("~/Views/Student/Transcript.cshtml", transcript);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> StudentDashboard(int studentId)
+        {
+            var dashboard = await _apiService.GetAsync<StudentDashboardViewModel>($"api/grades/dashboard/student/{studentId}");
+            if (dashboard == null)
+            {
+                TempData["ErrorMessage"] = "Tələbənin paneli tapılmadı.";
+                return RedirectToAction(nameof(Departments));
+            }
+
+            return View("~/Views/Student/Dashboard.cshtml", dashboard);
+        }
+
+        #endregion
     }
 }

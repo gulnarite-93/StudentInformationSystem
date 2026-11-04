@@ -196,6 +196,10 @@ namespace StudentInformationSystem.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal?>("AssignmentScore")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
                     b.Property<int>("EnrollmentId")
                         .HasColumnType("int");
 

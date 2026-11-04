@@ -1,0 +1,156 @@
+@model List<StudentInformationSystem.Web.Models.StudentGradeItemViewModel>
+@{
+    ViewData["Title"] = "Qiymətlərim (F4)";
+}
+
+<div class="container-fluid py-3">
+    <!-- Səhifə Başlığı -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-award-fill text-primary me-2"></i>Akademik Qiymətlərim (F4)
+            </h2>
+            <p class="text-muted mb-0">Fənlər üzrə cari qiymətləndirmə nəticələri, aralıq ballar və yekun qiymətlər</p>
+        </div>
+        <div>
+            <a asp-action="Transcript" class="btn btn-outline-primary rounded-pill px-4 shadow-sm me-2">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Rəsmi Transkript
+            </a>
+            <a asp-action="Dashboard" class="btn btn-light rounded-pill px-3">
+                <i class="bi bi-speedometer2 me-1"></i> Panel
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="card shadow-sm border-0 rounded-4 text-center p-5">
+            <i class="bi bi-journal-x display-1 text-muted mb-3"></i>
+            <h4 class="fw-bold text-dark">Hələ heç bir fənn üzrə qiymət daxil edilməyib</h4>
+            <p class="text-muted">Müəllimlər imtahan və tapşırıq ballarını daxil etdikdən sonra qiymətləriniz burada əks olunacaq.</p>
+        </div>
+    }
+    else
+    {
+        <!-- Xülasə Kartı -->
+        <div class="card border-0 rounded-4 shadow-sm mb-4 bg-white">
+            <div class="card-body p-4">
+                <div class="row g-3 text-center">
+                    <div class="col-md-3 border-end">
+                        <small class="text-muted text-uppercase fw-bold">Qiymətləndirilən Fənlər</small>
+                        <h3 class="fw-bold text-primary mb-0 mt-1">@Model.Count</h3>
+                    </div>
+                    <div class="col-md-3 border-end">
+                        <small class="text-muted text-uppercase fw-bold">Toplam Kredit</small>
+                        <h3 class="fw-bold text-success mb-0 mt-1">@Model.Sum(g => g.Credits)</h3>
+                    </div>
+                    <div class="col-md-3 border-end">
+                        <small class="text-muted text-uppercase fw-bold">Müvəffəqiyyətlə Keçilən</small>
+                        <h3 class="fw-bold text-info mb-0 mt-1">@Model.Count(g => g.IsPassed) / @Model.Count</h3>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted text-uppercase fw-bold">Orta Bal (100 üzərindən)</small>
+                        <h3 class="fw-bold text-dark mb-0 mt-1">
+                            @(Model.Any() ? Math.Round(Model.Average(g => g.TotalScore), 1).ToString("0.#") : "0")
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Qiymətlər Cədvəli -->
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+            <div class="card-header bg-white py-3 px-4 border-bottom">
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-table me-2 text-primary"></i>Fənn Qiymətləndirmə Cədvəli
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Kod</th>
+                                <th>Kursun Adı</th>
+                                <th class="text-center">Kredit</th>
+                                <th>Semestr</th>
+                                <th class="text-center">Kollokvium</th>
+                                <th class="text-center">Tapşırıq</th>
+                                <th class="text-center">İmtahan</th>
+                                <th class="text-center">Yekun Bal</th>
+                                <th class="text-center">Hərf</th>
+                                <th class="text-center">GPA (4.0)</th>
+                                <th class="text-center">Status</th>
+                                <th class="pe-4">Müəllim Rəyi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var grade in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4">
+                                        <span class="badge bg-secondary font-monospace">@grade.CourseCode</span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-dark">@grade.CourseName</strong>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border">@grade.Credits Kredit</span>
+                                    </td>
+                                    <td class="text-muted small">@grade.TermName</td>
+                                    <td class="text-center fw-semibold">
+                                        @(grade.MidtermScore.HasValue ? grade.MidtermScore.Value.ToString("0.##") : "-")
+                                    </td>
+                                    <td class="text-center fw-semibold">
+                                        @(grade.AssignmentScore.HasValue ? grade.AssignmentScore.Value.ToString("0.##") : "-")
+                                    </td>
+                                    <td class="text-center fw-semibold">
+                                        @(grade.FinalScore.HasValue ? grade.FinalScore.Value.ToString("0.##") : "-")
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="fw-bold fs-6 @(grade.IsPassed ? "text-success" : "text-danger")">
+                                            @grade.TotalScore.ToString("0.##")
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge @(grade.LetterGrade == "A" ? "bg-success" : grade.LetterGrade == "B" ? "bg-primary" : grade.LetterGrade == "C" ? "bg-info" : grade.LetterGrade == "D" || grade.LetterGrade == "E" ? "bg-warning text-dark" : "bg-danger") px-2 py-1 fs-6">
+                                            @grade.LetterGrade
+                                        </span>
+                                    </td>
+                                    <td class="text-center fw-bold">
+                                        @grade.GradePoint.ToString("0.00")
+                                    </td>
+                                    <td class="text-center">
+                                        @if (grade.IsPassed)
+                                        {
+                                            <span class="badge bg-success-subtle text-success px-2 py-1 rounded-pill">
+                                                <i class="bi bi-check-circle me-1"></i>Məqbul
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger px-2 py-1 rounded-pill">
+                                                <i class="bi bi-x-circle me-1"></i>Kəsr
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="pe-4 text-muted small fst-italic">
+                                        @(string.IsNullOrEmpty(grade.Feedback) ? "—" : grade.Feedback)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
