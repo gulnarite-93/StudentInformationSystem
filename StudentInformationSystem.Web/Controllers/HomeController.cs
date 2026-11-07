@@ -8,6 +8,22 @@ namespace StudentInformationSystem.Web.Controllers
     {
         public IActionResult Index()
         {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                if (User.IsInRole("Student"))
+                {
+                    return RedirectToAction("Dashboard", "Student");
+                }
+                if (User.IsInRole("Teacher"))
+                {
+                    return RedirectToAction("Grades", "Teacher");
+                }
+                if (User.IsInRole("Admin"))
+                {
+                    return RedirectToAction("Departments", "Admin");
+                }
+            }
+
             return View();
         }
 

@@ -1,0 +1,232 @@
+@model StudentInformationSystem.Web.Models.TranscriptViewModel
+@{
+    ViewData["Title"] = $"Akademik Transkript - {Model.FullName}";
+}
+
+<!-- Çap zamanı gizlənən alətlər paneli -->
+<div class="container py-3 d-print-none">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <a asp-action="Dashboard" class="btn btn-outline-secondary rounded-pill px-3 me-2">
+                <i class="bi bi-arrow-left me-1"></i> Panelə Qayıt
+            </a>
+            <a asp-action="Grades" class="btn btn-outline-primary rounded-pill px-3">
+                <i class="bi bi-award me-1"></i> Qiymətlərim
+            </a>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" onclick="window.print()">
+                <i class="bi bi-printer-fill me-2"></i> Transkripti Çap Et / PDF Saxla
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- RƏSMİ TRANSKRİPT SƏNƏDİ (Həm ekranda, həm A4 çapda səliqəli görünüş) -->
+<div class="container my-2 mb-5">
+    <div class="card border shadow-sm rounded-4 p-4 p-md-5 bg-white transcript-document">
+        <!-- 1. Universitet Başlığı və Gerbi -->
+        <div class="row align-items-center border-bottom pb-4 mb-4">
+            <div class="col-2 text-center">
+                <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center" style="width: 75px; height: 75px;">
+                    <i class="bi bi-bank2 fs-2"></i>
+                </div>
+            </div>
+            <div class="col-8 text-center">
+                <h6 class="text-uppercase tracking-wider text-muted fw-bold mb-1">Azərbaycan Respublikası Elm və Təhsil Nazirliyi</h6>
+                <h4 class="fw-bold text-dark mb-1">AZƏRBAYCAN DÖVLƏT İNFORMASİYA TEXNOLOGİYALARI UNİVERSİTETİ</h4>
+                <div class="badge bg-primary fs-6 px-4 py-1 text-uppercase fw-semibold tracking-wide">
+                    Rəsmi Akademik Transkript
+                </div>
+            </div>
+            <div class="col-2 text-center">
+                <div class="rounded-3 border p-2 text-muted small bg-light d-inline-block">
+                    <i class="bi bi-qr-code fs-2 d-block"></i>
+                    <span style="font-size: 0.65rem;">VERIFIED</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Tələbə Haqqında Rəsmi Məlumatlar -->
+        <div class="bg-light p-4 rounded-4 mb-4 border">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Tələbənin Tam Adı:</small>
+                    <div class="fw-bold fs-6 text-dark">@Model.FullName</div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Tələbə Nömrəsi (ID):</small>
+                    <div class="fw-bold fs-6 font-monospace text-primary">
+                        @(string.IsNullOrEmpty(Model.StudentNumber) ? "Qeyd olunmayıb" : Model.StudentNumber)
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">E-Poçt:</small>
+                    <div class="text-dark small">@Model.Email</div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Fakültə / Şöbə:</small>
+                    <div class="text-dark fw-semibold">@Model.DepartmentName</div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">İxtisas / Proqram:</small>
+                    <div class="text-dark fw-semibold">@Model.ProgrammeName</div>
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Tədris İli / Kurs:</small>
+                    <div class="text-dark fw-semibold">
+                        @(Model.AcademicYear.HasValue ? $"{Model.AcademicYear}-ci kurs" : "Bakalavr")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Semestrlər üzrə Fənlər Cədvəli -->
+        @if (!Model.Terms.Any())
+        {
+            <div class="text-center py-4 text-muted">
+                Hələ qeydə alınmış fənn qiymətləri yoxdur.
+            </div>
+        }
+        else
+        {
+            @foreach (var term in Model.Terms)
+            {
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center bg-secondary-subtle px-3 py-2 rounded-top border">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-calendar3 me-2 text-primary"></i>@term.TermName
+                        </h6>
+                        <span class="small fw-bold text-muted">
+                            Semestr Krediti: @term.TermCredits | Semestr GPA: <span class="text-primary">@term.TermGpa.ToString("0.00")</span>
+                        </span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm align-middle mb-0">
+                            <thead class="table-light text-center small">
+                                <tr>
+                                    <th style="width: 100px;">Fənn Kodu</th>
+                                    <th class="text-start">Fənnin Adı</th>
+                                    <th style="width: 90px;">Kredit</th>
+                                    <th style="width: 100px;">Yekun Bal (100)</th>
+                                    <th style="width: 80px;">Hərf</th>
+                                    <th style="width: 90px;">Əmsal (4.0)</th>
+                                    <th style="width: 100px;">Nəticə</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var course in term.Courses)
+                                {
+                                    <tr>
+                                        <td class="text-center font-monospace small">@course.CourseCode</td>
+                                        <td>@course.CourseName</td>
+                                        <td class="text-center">@course.Credits</td>
+                                        <td class="text-center fw-bold">@course.TotalScore.ToString("0.##")</td>
+                                        <td class="text-center fw-bold">@course.LetterGrade</td>
+                                        <td class="text-center">@course.GradePoint.ToString("0.00")</td>
+                                        <td class="text-center">
+                                            @if (course.Status == "Məqbul")
+                                            {
+                                                <span class="text-success fw-bold">Məqbul</span>
+                                            }
+                                            else if (course.Status == "Kəsr")
+                                            {
+                                                <span class="text-danger fw-bold">Kəsr</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Davam edir</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        }
+
+        <!-- 4. Yekun Akademik Nəticələr (GPA Bloku) -->
+        <div class="row g-3 my-2">
+            <div class="col-md-7">
+                <div class="border rounded-4 p-3 bg-light h-100">
+                    <h6 class="fw-bold text-dark mb-2 small text-uppercase">
+                        <i class="bi bi-info-circle me-1"></i>Akademik Qiymətləndirmə Şkalası
+                    </h6>
+                    <div class="row small text-muted g-1">
+                        <div class="col-4"><strong>A:</strong> 91-100 (4.00)</div>
+                        <div class="col-4"><strong>B:</strong> 81-90 (3.00)</div>
+                        <div class="col-4"><strong>C:</strong> 71-80 (2.00)</div>
+                        <div class="col-4"><strong>D:</strong> 61-70 (1.50)</div>
+                        <div class="col-4"><strong>E:</strong> 51-60 (1.00)</div>
+                        <div class="col-4"><strong>F:</strong> 0-50 (0.00)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="border border-2 border-primary rounded-4 p-3 bg-primary-subtle text-center h-100 d-flex flex-column justify-content-center">
+                    <small class="text-primary text-uppercase fw-bold">Ümumi Orta Müvəffəqiyyət Göstəricisi</small>
+                    <h1 class="display-5 fw-bold text-primary mb-1 mt-1">@Model.Gpa.ToString("0.00")</h1>
+                    <div class="small text-muted">
+                        Toplam Kredit: <strong>@Model.TotalCreditsCompleted</strong> / @Model.TotalCreditsAttempted (4.00 Şkalasında)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Təsdiq və İmza Bloku -->
+        <div class="row pt-5 mt-4 border-top text-center text-muted small">
+            <div class="col-4">
+                <div class="mb-4">Tədris Şöbəsinin Müdiri</div>
+                <div class="border-bottom mx-4 mb-2"></div>
+                <div>İmza / Tarix</div>
+            </div>
+            <div class="col-4">
+                <div class="rounded-circle border border-2 border-dashed d-inline-flex align-items-center justify-content-center" 
+                     style="width: 80px; height: 80px;">
+                    <span class="text-muted fw-bold" style="font-size: 0.7rem;">M.Y. (Möhür)</span>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="mb-4">Fakültə Dekanı</div>
+                <div class="border-bottom mx-4 mb-2"></div>
+                <div>İmza / Tarix</div>
+            </div>
+        </div>
+
+        <div class="text-center text-muted mt-4" style="font-size: 0.7rem;">
+            Sənəd sistem tərəfindən avtomatik generasiya olunub: @Model.GeneratedAt.ToString("dd.MM.yyyy HH:mm") UTC
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        body {
+            background-color: #fff !important;
+            font-size: 12pt;
+        }
+        .d-print-none, nav, footer, .navbar, .btn {
+            display: none !important;
+        }
+        .container {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .transcript-document {
+            box-shadow: none !important;
+            border: none !important;
+            padding: 0 !important;
+        }
+        table {
+            page-break-inside: auto;
+        }
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+    }
+</style>

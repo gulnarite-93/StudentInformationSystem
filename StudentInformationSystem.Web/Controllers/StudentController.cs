@@ -15,114 +15,42 @@ namespace StudentInformationSystem.Web.Controllers
             _apiService = apiService;
         }
 
+        // F6: Akademik Panel (Dashboard)
         [HttpGet]
-        public async Task<IActionResult> Profile()
+        public async Task<IActionResult> Dashboard()
         {
-            var profile = await _apiService.GetAsync<StudentProfileViewModel>("api/students/profile");
-            if (profile == null)
+            var dashboard = await _apiService.GetAsync<StudentDashboardViewModel>("api/grades/dashboard");
+            if (dashboard == null)
             {
-                TempData["ErrorMessage"] = "Profil məlumatları alına bilmədi.";
-                return RedirectToAction("Index", "Home");
+                TempData["ErrorMessage"] = "Akademik panel məlumatları alına bilmədi.";
+                return View(new StudentDashboardViewModel());
             }
 
-            return View(profile);
+            return View(dashboard);
         }
 
-        // F3: Kurs Seçimi və Qeydiyyat Səhifəsi
+        // F4: Qiymətlərim səhifəsi
         [HttpGet]
-        public async Task<IActionResult> Enrollment()
+        public async Task<IActionResult> Grades()
         {
-            var myEnrollments = await _apiService.GetAsync<List<EnrollmentViewModel>>("api/enrollments/my") 
-                ?? new List<EnrollmentViewModel>();
+            var grades = await _apiService.GetAsync<List<StudentGradeItemViewModel>>("api/grades/my-grades")
+                         ?? new List<StudentGradeItemViewModel>();
 
-            var availableCourses = await _apiService.GetAsync<List<StudentCourseRegistrationItemViewModel>>("api/enrollments/available") 
-                ?? new List<StudentCourseRegistrationItemViewModel>();
-
-            var model = new StudentCourseRegistrationPageViewModel
-            {
-                MyEnrollments = myEnrollments,
-                AvailableCourses = availableCourses
-            };
-
-            return View(model);
+            return View(grades);
         }
 
-        // F3: Kursa Yazılma
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Enroll(int courseId)
-        {
-            var (success, _, errorMessage) = await _apiService.PostWithResultAsync<object, EnrollmentViewModel>(
-                "api/enrollments/enroll", 
-                new { CourseId = courseId });
-
-            if (success)
-            {
-                TempData["SuccessMessage"] = "Kursa uğurla yazıldınız!";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = errorMessage ?? "Kursa qeydiyyat zamanı xəta baş verdi.";
-            }
-
-            return RedirectToAction(nameof(Enrollment));
-        }
-
-        // F3: Kursdan Çıxma (Drop) - enrollmentId vasitəsilə
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Drop(int enrollmentId)
-        {
-            var (success, _, errorMessage) = await _apiService.PostWithResultAsync<object, object>(
-                $"api/enrollments/{enrollmentId}/drop", 
-                new { });
-
-            if (success)
-            {
-                TempData["SuccessMessage"] = "Kursdan uğurla imtina etdiniz (çıxarıldınız).";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = errorMessage ?? "Kursdan çıxarkən xəta baş verdi.";
-            }
-
-            return RedirectToAction(nameof(Enrollment));
-        }
-
-        // F3: Kursdan Çıxma (Drop) - courseId vasitəsilə
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task DropCourse(int courseId)
-        {
-            var (success, _, errorMessage) = await _apiService.PostWithResultAsync<object, object>(
-                "api/enrollments/drop-course", 
-                new { CourseId = courseId });
-
-            if (success)
-            {
-                TempData["SuccessMessage"] = "Kursdan uğurla imtina etdiniz.";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = errorMessage ?? "Kursdan çıxarkən xəta baş verdi.";
-            }
-
-            Response.Redirect(Url.Action(nameof(Enrollment))!);
-        }
-
-        // F5: Tələbənin Davamiyyət Səhifəsi
+        // F4 & F6: Rəsmi Transkript səhifəsi
         [HttpGet]
-        public async Task<IActionResult> Attendance()
+        public async Task<IActionResult> Transcript()
         {
-            var summaries = await _apiService.GetAsync<List<StudentCourseAttendanceSummaryViewModel>>("api/attendance/my") 
-                ?? new List<StudentCourseAttendanceSummaryViewModel>();
-
-            var model = new StudentAttendancePageViewModel
+            var transcript = await _apiService.GetAsync<TranscriptViewModel>("api/grades/transcript");
+            if (transcript == null)
             {
-                Courses = summaries
-            };
+                TempData["ErrorMessage"] = "Transkript alına bilmədi.";
+                return View(new TranscriptViewModel());
+            }
 
-            return View(model);
+            return View(transcript);
         }
     }
 }

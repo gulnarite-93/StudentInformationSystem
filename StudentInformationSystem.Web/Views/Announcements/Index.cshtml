@@ -1,0 +1,170 @@
+@model List<StudentInformationSystem.Web.Models.AnnouncementItemViewModel>
+@{
+    ViewData["Title"] = "Elanlar";
+    var currentFilter = ViewBag.CurrentFilter as string;
+    var canCreate = User.IsInRole("Admin") || User.IsInRole("Teacher");
+}
+
+<div class="container-fluid px-4 py-4">
+    <!-- Başlıq və Yeni Elan Düyməsi -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-megaphone-fill text-warning me-2"></i>Elanlar Lövhəsi (F7)
+            </h2>
+            <p class="text-muted mb-0">
+                Müəssisə üzrə rəsmi bildirişlər və fənlərə aid xüsusi elanlar
+            </p>
+        </div>
+        @if (canCreate)
+        {
+            <div>
+                <a asp-action="Create" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
+                    <i class="bi bi-plus-circle me-2"></i>Yeni Elan Paylaş
+                </a>
+            </div>
+        }
+    </div>
+
+    <!-- Bildiriş Mesajları -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+            <div>@TempData["SuccessMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+            <div>@TempData["ErrorMessage"]</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Filtrlər (Pills) -->
+    <div class="card shadow-sm border-0 rounded-4 p-2 mb-4 bg-white">
+        <ul class="nav nav-pills nav-fill">
+            <li class="nav-item">
+                <a class="nav-link @(string.IsNullOrEmpty(currentFilter) ? "active bg-primary text-white" : "text-dark") rounded-pill py-2"
+                   asp-action="Index">
+                    <i class="bi bi-collection me-1"></i> Bütün Elanlar (@Model.Count)
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(currentFilter == "institution" ? "active bg-primary text-white" : "text-dark") rounded-pill py-2"
+                   asp-action="Index" asp-route-filter="institution">
+                    <i class="bi bi-buildings me-1"></i> Müəssisə Üzrə (Ümumi)
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(currentFilter == "course" ? "active bg-primary text-white" : "text-dark") rounded-pill py-2"
+                   asp-action="Index" asp-route-filter="course">
+                    <i class="bi bi-journal-bookmark me-1"></i> Fənn Elanları
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Elanların Siyahısı -->
+    @if (!Model.Any())
+    {
+        <div class="card shadow-sm border-0 rounded-4 p-5 text-center bg-white my-4">
+            <div class="py-5">
+                <div class="display-1 text-muted mb-3">
+                    <i class="bi bi-chat-square-text"></i>
+                </div>
+                <h4 class="fw-bold text-secondary">Heç bir elan tapılmadı</h4>
+                <p class="text-muted mb-4">
+                    @(string.IsNullOrEmpty(currentFilter) 
+                        ? "Hazırda aktiv heç bir elan mövcud deyil." 
+                        : "Seçilmiş kateqoriyada elan yoxdur.")
+                </p>
+                @if (canCreate)
+                {
+                    <a asp-action="Create" class="btn btn-outline-primary rounded-pill px-4">
+                        <i class="bi bi-plus-lg me-1"></i> İlk Elanı Paylaşın
+                    </a>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col-12">
+                    <div class="card shadow-sm border-0 rounded-4 hover-shadow transition h-100 overflow-hidden bg-white">
+                        <div class="card-header bg-white border-0 pt-3 px-4 pb-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                @if (item.IsInstitutionWide)
+                                {
+                                    <span class="badge bg-warning-subtle text-dark border border-warning px-3 py-2 rounded-pill fw-semibold">
+                                        <i class="bi bi-megaphone-fill text-warning me-1"></i> Müəssisə Üzrə Elan
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-primary-subtle text-primary border border-primary px-3 py-2 rounded-pill fw-semibold">
+                                        <i class="bi bi-journal-text me-1"></i> Fənn: @item.CourseCode - @item.CourseName
+                                    </span>
+                                }
+                            </div>
+
+                            <small class="text-muted d-flex align-items-center">
+                                <i class="bi bi-clock-history me-1"></i>
+                                @item.CreatedAt.ToString("dd MMMM yyyy, HH:mm")
+                            </small>
+                        </div>
+
+                        <div class="card-body px-4 py-3">
+                            <h4 class="card-title fw-bold text-dark mb-3">
+                                @item.Title
+                            </h4>
+                            <p class="card-text text-secondary mb-4" style="white-space: pre-wrap; line-height: 1.6;">@item.Content</p>
+                        </div>
+
+                        <div class="card-footer bg-light border-top px-4 py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; font-weight: bold;">
+                                    @(string.IsNullOrEmpty(item.AuthorName) ? "A" : item.AuthorName.Substring(0, 1))
+                                </div>
+                                <div>
+                                    <div class="fw-semibold text-dark small">@item.AuthorName</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">
+                                        @(item.AuthorRole == "Admin" ? "Sistem Administratoru" : item.AuthorRole == "Teacher" ? "Müəllim" : item.AuthorRole)
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (item.CanEdit || item.CanDelete)
+                            {
+                                <div class="d-flex align-items-center gap-2">
+                                    @if (item.CanEdit)
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                                            <i class="bi bi-pencil me-1"></i> Redaktə
+                                        </a>
+                                    }
+                                    @if (item.CanDelete)
+                                    {
+                                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
+                                              onsubmit="return confirm('Bu elanı silmək istədiyinizə əminsiniz?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                                                <i class="bi bi-trash me-1"></i> Sil
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

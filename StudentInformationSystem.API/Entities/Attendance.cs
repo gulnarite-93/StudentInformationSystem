@@ -14,6 +14,6 @@ namespace StudentInformationSystem.API.Entities
         public string? LessonTopic { get; set; } // Dərsin mövzusu
         public bool IsPresent { get; set; } = true; // İştirak edib ya yox
         public string Status { get; set; } = AttendanceStatus.Present; // Present (Gəldi), Absent (Gəlmədi), Excused (İcazəli)
-        public string? Note { get; set; } // Qeyd
+        public string? Note { get; set; } // Qeyd (üzrlü/üzrsüz)
     }
 }

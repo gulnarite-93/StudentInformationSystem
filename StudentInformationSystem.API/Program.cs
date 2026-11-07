@@ -1,7 +1,9 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 using StudentInformationSystem.API.Data;
 using StudentInformationSystem.API.Repositories;
@@ -35,6 +37,9 @@ namespace StudentInformationSystem.API
             builder.Services.AddScoped<ICourseService, CourseService>();
             builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
             builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+            builder.Services.AddScoped<IGpaService, GpaService>();
+            builder.Services.AddScoped<IGradeService, GradeService>();
+            builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 
             // 3. JWT Autentifikasiyası
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -79,7 +84,46 @@ namespace StudentInformationSystem.API
 
             // 5. Controllers və OpenAPI (Scalar)
             builder.Services.AddControllers();
-            builder.Services.AddOpenApi();
+            builder.Services.AddOpenApi(options =>
+            {
+                // JWT Bearer Security Scheme (OpenAPI Components)
+                options.AddDocumentTransformer((document, context, cancellationToken) =>
+                {
+                    document.Components ??= new OpenApiComponents();
+                    document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+
+                    document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
+                    {
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer",
+                        BearerFormat = "JWT",
+                        In = ParameterLocation.Header,
+                        Description = "JWT Bearer token. Login sorğusundan əldə etdiyiniz tokeni daxil edin (Məsələn: 'Bearer eyJhbGciOi...')."
+                    };
+
+                    return Task.CompletedTask;
+                });
+
+                // [Authorize] olan bütün endpoint-lər üçün qıfıl işarəsi və Bearer tələbi
+                options.AddOperationTransformer((operation, context, cancellationToken) =>
+                {
+                    var metadata = context.Description.ActionDescriptor.EndpointMetadata;
+                    var hasAuthorize = metadata.OfType<AuthorizeAttribute>().Any();
+                    var hasAllowAnonymous = metadata.OfType<AllowAnonymousAttribute>().Any();
+
+                    if (hasAuthorize && !hasAllowAnonymous)
+                    {
+                        operation.Security ??= new List<OpenApiSecurityRequirement>();
+                        operation.Security.Add(new OpenApiSecurityRequirement
+                        {
+                            [new OpenApiSecuritySchemeReference("Bearer")] = new List<string>()
+                        });
+                    }
+
+                    return Task.CompletedTask;
+                });
+            });
 
             var app = builder.Build();
 
@@ -87,7 +131,11 @@ namespace StudentInformationSystem.API
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
-                app.MapScalarApiReference();
+                app.MapScalarApiReference(options =>
+                {
+                    options.WithTitle("Student Information System (SIS) API")
+                           .AddPreferredSecuritySchemes("Bearer");
+                });
             }
 
             app.UseHttpsRedirection();

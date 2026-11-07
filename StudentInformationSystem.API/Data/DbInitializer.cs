@@ -31,45 +31,100 @@ namespace StudentInformationSystem.API.Data
 
             if (await context.Users.AnyAsync())
             {
-                // Əgər bazada istifadəçilər artıq varsa, lakin hələ qeydiyyatlar yoxdursa, ilkin qeydiyyatları əlavə edirik
+                // Əgər bazada istifadəçilər varsa, lakin hələ qeydiyyatlar və ya qiymətlər yoxdursa, əlavə edirik
                 if (!await context.Enrollments.AnyAsync() && await context.Courses.AnyAsync())
                 {
                     var s1 = await context.Users.FirstOrDefaultAsync(u => u.Username == "student.aydan");
                     var s2 = await context.Users.FirstOrDefaultAsync(u => u.Username == "student.elmir");
                     var c1 = await context.Courses.FirstOrDefaultAsync(c => c.Code == "IT101");
                     var c2 = await context.Courses.FirstOrDefaultAsync(c => c.Code == "IT102");
+                    var c3 = await context.Courses.FirstOrDefaultAsync(c => c.Code == "IT201");
 
-                    if (s1 != null && s2 != null && c1 != null && c2 != null)
+                    if (s1 != null && s2 != null && c1 != null && c2 != null && c3 != null)
                     {
                         await context.Enrollments.AddRangeAsync(
-                            new Enrollment { StudentId = s1.Id, CourseId = c1.Id, EnrollmentDate = DateTime.UtcNow, Status = "Enrolled" },
-                            new Enrollment { StudentId = s1.Id, CourseId = c2.Id, EnrollmentDate = DateTime.UtcNow, Status = "Enrolled" },
-                            new Enrollment { StudentId = s2.Id, CourseId = c2.Id, EnrollmentDate = DateTime.UtcNow, Status = "Enrolled" }
+                            new Enrollment { StudentId = s1.Id, CourseId = c1.Id, EnrollmentDate = DateTime.UtcNow.AddMonths(-2), Status = "Enrolled" },
+                            new Enrollment { StudentId = s1.Id, CourseId = c2.Id, EnrollmentDate = DateTime.UtcNow.AddMonths(-2), Status = "Enrolled" },
+                            new Enrollment { StudentId = s2.Id, CourseId = c2.Id, EnrollmentDate = DateTime.UtcNow.AddMonths(-2), Status = "Enrolled" },
+                            new Enrollment { StudentId = s1.Id, CourseId = c3.Id, EnrollmentDate = DateTime.UtcNow.AddMonths(-2), Status = "Enrolled" }
                         );
                         await context.SaveChangesAsync();
                     }
                 }
 
-                // İlkin davamiyyət qeydləri
-                if (!await context.Attendances.AnyAsync() && await context.Courses.AnyAsync())
+                // İlkin Qiymətlər
+                if (!await context.Grades.AnyAsync() && await context.Enrollments.AnyAsync())
                 {
-                    var s1 = await context.Users.FirstOrDefaultAsync(u => u.Username == "student.aydan");
-                    var s2 = await context.Users.FirstOrDefaultAsync(u => u.Username == "student.elmir");
-                    var c2 = await context.Courses.FirstOrDefaultAsync(c => c.Code == "IT102");
+                    var enr1 = await context.Enrollments.FirstOrDefaultAsync(e => e.Student.Username == "student.aydan" && e.Course.Code == "IT101");
+                    var enr2 = await context.Enrollments.FirstOrDefaultAsync(e => e.Student.Username == "student.aydan" && e.Course.Code == "IT102");
+                    var enr3 = await context.Enrollments.FirstOrDefaultAsync(e => e.Student.Username == "student.elmir" && e.Course.Code == "IT102");
+                    var enr4 = await context.Enrollments.FirstOrDefaultAsync(e => e.Student.Username == "student.aydan" && e.Course.Code == "IT201");
 
-                    if (s1 != null && s2 != null && c2 != null)
+                    if (enr1 != null)
                     {
-                        var d1 = DateTime.Today.AddDays(-7);
-                        var d2 = DateTime.Today.AddDays(-2);
-
-                        await context.Attendances.AddRangeAsync(
-                            new Attendance { CourseId = c2.Id, StudentId = s1.Id, LessonDate = d1, LessonTopic = "1-ci Mühazirə: Giriş və SQL Əsasları", Status = AttendanceStatus.Present, IsPresent = true },
-                            new Attendance { CourseId = c2.Id, StudentId = s2.Id, LessonDate = d1, LessonTopic = "1-ci Mühazirə: Giriş və SQL Əsasları", Status = AttendanceStatus.Present, IsPresent = true },
-                            new Attendance { CourseId = c2.Id, StudentId = s1.Id, LessonDate = d2, LessonTopic = "2-ci Mühazirə: DDL və DML Əmrləri", Status = AttendanceStatus.Present, IsPresent = true },
-                            new Attendance { CourseId = c2.Id, StudentId = s2.Id, LessonDate = d2, LessonTopic = "2-ci Mühazirə: DDL və DML Əmrləri", Status = AttendanceStatus.Absent, IsPresent = false, Note = "Xəbərdarlıqsız gəlməyib" }
-                        );
-                        await context.SaveChangesAsync();
+                        await context.Grades.AddAsync(new Grade
+                        {
+                            EnrollmentId = enr1.Id,
+                            MidtermScore = 28m,
+                            AssignmentScore = 18m,
+                            FinalScore = 46m,
+                            TotalScore = 92m,
+                            LetterGrade = "A",
+                            GradePoint = 4.0m,
+                            Feedback = "C# dili üzrə praktiki tapşırıqları yüksək səviyyədə icra etdi.",
+                            EvaluatedAt = DateTime.UtcNow.AddDays(-10)
+                        });
                     }
+
+                    if (enr2 != null)
+                    {
+                        await context.Grades.AddAsync(new Grade
+                        {
+                            EnrollmentId = enr2.Id,
+                            MidtermScore = 25m,
+                            AssignmentScore = 17m,
+                            FinalScore = 42m,
+                            TotalScore = 84m,
+                            LetterGrade = "B",
+                            GradePoint = 3.0m,
+                            Feedback = "SQL sorğuları və normallaşdırmanı yaxşı mənimsəyib.",
+                            EvaluatedAt = DateTime.UtcNow.AddDays(-5)
+                        });
+                    }
+
+                    if (enr3 != null)
+                    {
+                        await context.Grades.AddAsync(new Grade
+                        {
+                            EnrollmentId = enr3.Id,
+                            MidtermScore = 27m,
+                            AssignmentScore = 19m,
+                            FinalScore = 45m,
+                            TotalScore = 91m,
+                            LetterGrade = "A",
+                            GradePoint = 4.0m,
+                            Feedback = "Dərslərdə və laboratoriyalarda çox aktiv iştirak edib.",
+                            EvaluatedAt = DateTime.UtcNow.AddDays(-5)
+                        });
+                    }
+
+                    if (enr4 != null)
+                    {
+                        await context.Grades.AddAsync(new Grade
+                        {
+                            EnrollmentId = enr4.Id,
+                            MidtermScore = 22m,
+                            AssignmentScore = 15m,
+                            FinalScore = 38m,
+                            TotalScore = 75m,
+                            LetterGrade = "C",
+                            GradePoint = 2.0m,
+                            Feedback = "Veb proqramlaşdırma üzrə layihəni təhvil verdi.",
+                            EvaluatedAt = DateTime.UtcNow.AddDays(-2)
+                        });
+                    }
+
+                    await context.SaveChangesAsync();
                 }
 
                 return;
@@ -244,27 +299,7 @@ namespace StudentInformationSystem.API.Data
             await context.Courses.AddRangeAsync(course1, course2, course3);
             await context.SaveChangesAsync();
 
-            // 6. İlkin Tələbə Qeydiyyatları (Enrollments)
-            var enr1 = new Enrollment { StudentId = student1.Id, CourseId = course1.Id, EnrollmentDate = DateTime.UtcNow, Status = "Enrolled" };
-            var enr2 = new Enrollment { StudentId = student1.Id, CourseId = course2.Id, EnrollmentDate = DateTime.UtcNow, Status = "Enrolled" };
-            var enr3 = new Enrollment { StudentId = student2.Id, CourseId = course2.Id, EnrollmentDate = DateTime.UtcNow, Status = "Enrolled" };
-
-            await context.Enrollments.AddRangeAsync(enr1, enr2, enr3);
-            await context.SaveChangesAsync();
-
-            // 7. İlkin Davamiyyət (Attendance)
-            var lessonDate1 = DateTime.Today.AddDays(-7);
-            var lessonDate2 = DateTime.Today.AddDays(-2);
-
-            await context.Attendances.AddRangeAsync(
-                new Attendance { CourseId = course2.Id, StudentId = student1.Id, LessonDate = lessonDate1, LessonTopic = "1-ci Mühazirə: Giriş və SQL Əsasları", Status = AttendanceStatus.Present, IsPresent = true },
-                new Attendance { CourseId = course2.Id, StudentId = student2.Id, LessonDate = lessonDate1, LessonTopic = "1-ci Mühazirə: Giriş və SQL Əsasları", Status = AttendanceStatus.Present, IsPresent = true },
-                new Attendance { CourseId = course2.Id, StudentId = student1.Id, LessonDate = lessonDate2, LessonTopic = "2-ci Mühazirə: DDL və DML Əmrləri", Status = AttendanceStatus.Present, IsPresent = true },
-                new Attendance { CourseId = course2.Id, StudentId = student2.Id, LessonDate = lessonDate2, LessonTopic = "2-ci Mühazirə: DDL və DML Əmrləri", Status = AttendanceStatus.Absent, IsPresent = false, Note = "Xəbərdarlıqsız gəlməyib" }
-            );
-            await context.SaveChangesAsync();
-
-            // 8. İlkin Elan (Ümumi müəssisə üzrə)
+            // 6. İlkin Elanlar (Ümumi müəssisə üzrə və fənn üzrə)
             var announcement = new Announcement
             {
                 Title = "Yeni Tədris İliniz Mübarək!",
@@ -274,7 +309,78 @@ namespace StudentInformationSystem.API.Data
                 CreatedAt = DateTime.UtcNow
             };
 
-            await context.Announcements.AddAsync(announcement);
+            var courseAnnouncement = new Announcement
+            {
+                Title = "Laboratoriya işləri haqqında elan",
+                Content = "Hörmətli tələbələr, gələn həftə IT102 fənni üzrə laboratoriya işlərinin müdafiəsi keçiriləcəkdir. Hər kəsin vaxtında iştirakı vacibdir.",
+                AuthorId = teacher2.Id,
+                CourseId = course2.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await context.Announcements.AddRangeAsync(announcement, courseAnnouncement);
+            await context.SaveChangesAsync();
+
+            // 7. Qeydiyyatlar və İlkin Qiymətlər
+            var enrAydan1 = new Enrollment { StudentId = student1.Id, CourseId = course1.Id, EnrollmentDate = DateTime.UtcNow.AddMonths(-2), Status = "Enrolled" };
+            var enrAydan2 = new Enrollment { StudentId = student1.Id, CourseId = course2.Id, EnrollmentDate = DateTime.UtcNow.AddMonths(-2), Status = "Enrolled" };
+            var enrElmir2 = new Enrollment { StudentId = student2.Id, CourseId = course2.Id, EnrollmentDate = DateTime.UtcNow.AddMonths(-2), Status = "Enrolled" };
+            var enrAydan3 = new Enrollment { StudentId = student1.Id, CourseId = course3.Id, EnrollmentDate = DateTime.UtcNow.AddMonths(-2), Status = "Enrolled" };
+
+            await context.Enrollments.AddRangeAsync(enrAydan1, enrAydan2, enrElmir2, enrAydan3);
+            await context.SaveChangesAsync();
+
+            await context.Grades.AddRangeAsync(
+                new Grade
+                {
+                    EnrollmentId = enrAydan1.Id,
+                    MidtermScore = 28m,
+                    AssignmentScore = 18m,
+                    FinalScore = 46m,
+                    TotalScore = 92m,
+                    LetterGrade = "A",
+                    GradePoint = 4.0m,
+                    Feedback = "C# dili üzrə praktiki tapşırıqları yüksək səviyyədə icra etdi.",
+                    EvaluatedAt = DateTime.UtcNow.AddDays(-10)
+                },
+                new Grade
+                {
+                    EnrollmentId = enrAydan2.Id,
+                    MidtermScore = 25m,
+                    AssignmentScore = 17m,
+                    FinalScore = 42m,
+                    TotalScore = 84m,
+                    LetterGrade = "B",
+                    GradePoint = 3.0m,
+                    Feedback = "SQL sorğuları və normallaşdırmanı yaxşı mənimsəyib.",
+                    EvaluatedAt = DateTime.UtcNow.AddDays(-5)
+                },
+                new Grade
+                {
+                    EnrollmentId = enrElmir2.Id,
+                    MidtermScore = 27m,
+                    AssignmentScore = 19m,
+                    FinalScore = 45m,
+                    TotalScore = 91m,
+                    LetterGrade = "A",
+                    GradePoint = 4.0m,
+                    Feedback = "Dərslərdə və laboratoriyalarda çox aktiv iştirak edib.",
+                    EvaluatedAt = DateTime.UtcNow.AddDays(-5)
+                },
+                new Grade
+                {
+                    EnrollmentId = enrAydan3.Id,
+                    MidtermScore = 22m,
+                    AssignmentScore = 15m,
+                    FinalScore = 38m,
+                    TotalScore = 75m,
+                    LetterGrade = "C",
+                    GradePoint = 2.0m,
+                    Feedback = "Veb proqramlaşdırma üzrə layihəni təhvil verdi.",
+                    EvaluatedAt = DateTime.UtcNow.AddDays(-2)
+                }
+            );
+
             await context.SaveChangesAsync();
         }
     }

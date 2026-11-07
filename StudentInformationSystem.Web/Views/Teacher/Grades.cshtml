@@ -1,0 +1,94 @@
+@model List<StudentInformationSystem.Web.Models.TeacherGradeCourseSummaryViewModel>
+@{
+    ViewData["Title"] = "Fənlər üzrə Qiymətləndirmə (F4)";
+}
+
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-award-fill text-primary me-2"></i>Fənlər üzrə Qiymətləndirmə (F4)
+            </h2>
+            <p class="text-muted mb-0">Təhkim olunduğunuz fənlər və tələbələrin qiymətləndirilmə vəziyyəti</p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="card shadow-sm border-0 rounded-4 text-center p-5">
+            <i class="bi bi-journal-x display-1 text-muted mb-3"></i>
+            <h4 class="fw-bold text-dark">Sizə təhkim olunmuş fənn tapılmadı</h4>
+            <p class="text-muted">Qiymətləndirmə aparmaq üçün administrator tərəfindən sizə fənn təyin olunmalıdır.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var course in Model)
+            {
+                var completionPercent = course.TotalEnrolled > 0 
+                    ? (int)Math.Round((double)course.GradedCount / course.TotalEnrolled * 100) 
+                    : 0;
+
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden card-hover">
+                        <div class="card-header bg-primary text-white p-3 d-flex justify-content-between align-items-center">
+                            <span class="badge bg-light text-primary fw-bold font-monospace px-2 py-1">@course.CourseCode</span>
+                            <span class="badge bg-white text-dark rounded-pill">@course.Credits Kredit</span>
+                        </div>
+                        <div class="card-body p-4 d-flex flex-column">
+                            <h5 class="fw-bold text-dark mb-2">@course.CourseName</h5>
+                            <p class="text-muted small mb-3">
+                                <i class="bi bi-calendar3 me-1 text-primary"></i>@course.TermName
+                            </p>
+
+                            <div class="bg-light p-3 rounded-3 mb-3 mt-auto">
+                                <div class="d-flex justify-content-between text-muted small mb-1">
+                                    <span>Qiymətləndirilmə gedişatı:</span>
+                                    <span class="fw-bold text-dark">@course.GradedCount / @course.TotalEnrolled tələbə (@completionPercent%)</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar @(completionPercent == 100 ? "bg-success" : "bg-primary")" 
+                                         role="progressbar" style="width: @completionPercent%;" 
+                                         aria-valuenow="@completionPercent" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <a asp-action="CourseGrades" asp-route-courseId="@course.CourseId" 
+                               class="btn btn-primary w-100 fw-semibold rounded-3 mt-2">
+                                <i class="bi bi-pencil-square me-2"></i>Qiymətləndirmə Cədvəli
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .card-hover {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+    }
+</style>
