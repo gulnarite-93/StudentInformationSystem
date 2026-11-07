@@ -8,8 +8,26 @@ namespace StudentInformationSystem.API.Data
     {
         public static async Task SeedAsync(AppDbContext context, IPasswordHasher passwordHasher)
         {
-            // Baza cədvəllərinin mövcudluğunu və miqrasiyaların tətbiqini təmin edirik
+            // 1. Baza cədvəllərinin mövcudluğunu və miqrasiyaların tətbiqini təmin edirik
             await context.Database.MigrateAsync();
+
+            // 2. Attendances cədvəlində Status sütununun mövcudluğunu birbaşa SQL ilə zəmanətə alırıq
+            try
+            {
+                await context.Database.ExecuteSqlRawAsync(@"
+                    IF NOT EXISTS (
+                        SELECT 1 FROM sys.columns 
+                        WHERE object_id = OBJECT_ID('Attendances') AND name = 'Status'
+                    )
+                    BEGIN
+                        ALTER TABLE Attendances ADD [Status] nvarchar(max) NOT NULL CONSTRAINT DF_Attendances_Status DEFAULT 'Present';
+                    END
+                ");
+            }
+            catch
+            {
+                // Digər provider və ya məhdud hüquqlar zamanı səssiz davam et
+            }
 
             if (await context.Users.AnyAsync())
             {

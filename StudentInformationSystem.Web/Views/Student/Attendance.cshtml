@@ -1,0 +1,218 @@
+@model StudentInformationSystem.Web.Models.StudentAttendancePageViewModel
+@{
+    ViewData["Title"] = "Davamiyyətim (F5)";
+}
+
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-calendar-check text-primary me-2"></i>Davamiyyətim (F5)
+            </h2>
+            <p class="text-muted mb-0">
+                Yazıldığınız fənlər üzrə dərs iştirakınız, qayıblarınız və davamiyyət faiziniz.
+            </p>
+        </div>
+        <a asp-action="Enrollment" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-pencil-square me-1"></i> Kurs Seçimi / Qeydiyyat
+        </a>
+    </div>
+</div>
+
+<!-- Ümumi Statistika Kartları -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 rounded-3 border-start border-primary border-4">
+            <div class="card-body p-3 d-flex align-items-center">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3 text-primary">
+                    <i class="bi bi-calendar-event fs-3"></i>
+                </div>
+                <div>
+                    <span class="text-muted small d-block">Cəmi Keçirilmiş Dərs</span>
+                    <strong class="text-dark fs-4">@Model.OverallTotalLessons</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 rounded-3 border-start border-success border-4">
+            <div class="card-body p-3 d-flex align-items-center">
+                <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3 text-success">
+                    <i class="bi bi-check-circle fs-3"></i>
+                </div>
+                <div>
+                    <span class="text-muted small d-block">İştirak Etdiyim (Gəldi)</span>
+                    <strong class="text-success fs-4">@Model.OverallPresentCount</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 rounded-3 border-start border-danger border-4">
+            <div class="card-body p-3 d-flex align-items-center">
+                <div class="rounded-circle bg-danger bg-opacity-10 p-3 me-3 text-danger">
+                    <i class="bi bi-x-circle fs-3"></i>
+                </div>
+                <div>
+                    <span class="text-muted small d-block">Qayıblarım (Gəlmədi)</span>
+                    <strong class="text-danger fs-4">@Model.OverallAbsentCount</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 rounded-3 border-start border-info border-4">
+            <div class="card-body p-3 d-flex align-items-center">
+                <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3 text-info">
+                    <i class="bi bi-percent fs-3"></i>
+                </div>
+                <div>
+                    <span class="text-muted small d-block">Ümumi Davamiyyət Faizi</span>
+                    <strong class="text-dark fs-4">@Model.OverallPercentage%</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!Model.Courses.Any())
+{
+    <div class="card shadow-sm border-0 rounded-4 text-center py-5">
+        <div class="card-body">
+            <i class="bi bi-journal-x display-3 text-muted"></i>
+            <h4 class="mt-3 text-dark fw-bold">Siz hələ heç bir fənnə yazılmamısınız</h4>
+            <p class="text-muted col-md-6 mx-auto">
+                Davamiyyətinizi görmək üçün ilk növbədə cari aktiv semestrin kurslarına qeydiyyatdan keçməlisiniz.
+            </p>
+            <a asp-action="Enrollment" class="btn btn-primary btn-sm mt-2">
+                <i class="bi bi-pencil-square me-1"></i> Kurs Seçiminə Keç
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var c in Model.Courses)
+        {
+            var progressColor = c.AttendancePercentage >= 75 ? "bg-success" : (c.AttendancePercentage >= 60 ? "bg-warning" : "bg-danger");
+            var isLimitWarning = c.TotalLessons > 0 && c.AttendancePercentage < 75;
+
+            <div class="col-12">
+                <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <div>
+                                <span class="badge bg-secondary font-monospace px-2 py-1 me-2">@c.CourseCode</span>
+                                <strong class="fs-5 text-dark">@c.CourseName</strong>
+                                <span class="badge bg-primary rounded-pill ms-2">@c.Credits KREDİT</span>
+                                <div class="small text-muted mt-1">
+                                    <i class="bi bi-person-circle me-1"></i>Müəllim: <strong>@c.TeacherName</strong> | Semestr: @c.TermName
+                                </div>
+                            </div>
+                            <div class="text-md-end">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-light text-dark border px-3 py-2">
+                                        Cəmi Dərs: <strong>@c.TotalLessons</strong>
+                                    </span>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                                        Gəldi: <strong>@c.PresentCount</strong>
+                                    </span>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2">
+                                        Qayıb: <strong>@c.AbsentCount</strong>
+                                    </span>
+                                    @if (c.ExcusedCount > 0)
+                                    {
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-2">
+                                            İcazəli: <strong>@c.ExcusedCount</strong>
+                                        </span>
+                                    }
+                                    <span class="badge @(c.AttendancePercentage >= 75 ? "bg-success" : (c.AttendancePercentage >= 60 ? "bg-warning text-dark" : "bg-danger")) fs-6 px-3 py-2">
+                                        @c.AttendancePercentage%
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Davamiyyət Tərəqqi Şkalası (Progress Bar) -->
+                        <div class="progress mt-3" style="height: 8px;">
+                            <div class="progress-bar @progressColor" role="progressbar" 
+                                 style="width: @c.AttendancePercentage%;" 
+                                 aria-valuenow="@c.AttendancePercentage" aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+
+                        @if (isLimitWarning)
+                        {
+                            <div class="alert alert-warning py-1 px-3 mt-2 mb-0 small rounded-2">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                <strong>Diqqət:</strong> Bu fənn üzrə davamiyyət faiziniz 75%-dən aşağıdır. Qayıb limitinə görə imtahana buraxılmama riski yarana bilər.
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Dərs Sessiyaları Tarixçəsi Cədvəli -->
+                    <div class="card-body p-0">
+                        @if (!c.History.Any())
+                        {
+                            <div class="text-center py-4 text-muted small">
+                                <i class="bi bi-info-circle me-1"></i>Bu fənn üzrə hələ heç bir dərs sessiyası qeydə alınmayıb.
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light small">
+                                        <tr>
+                                            <th class="ps-4" style="width: 140px;">Tarix</th>
+                                            <th>Dərsin Mövzusu</th>
+                                            <th style="width: 150px;">Status</th>
+                                            <th class="pe-4" style="width: 250px;">Müəllimin Qeydi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="small">
+                                        @foreach (var h in c.History)
+                                        {
+                                            <tr>
+                                                <td class="ps-4">
+                                                    <i class="bi bi-calendar3 text-muted me-1"></i>@h.LessonDate.ToString("dd.MM.yyyy")
+                                                </td>
+                                                <td>
+                                                    @(string.IsNullOrEmpty(h.LessonTopic) ? "Mövzu qeyd edilməyib" : h.LessonTopic)
+                                                </td>
+                                                <td>
+                                                    @if (h.Status == "Present")
+                                                    {
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                                            <i class="bi bi-check-circle-fill me-1"></i> Gəldi
+                                                        </span>
+                                                    }
+                                                    else if (h.Status == "Absent")
+                                                    {
+                                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                                                            <i class="bi bi-x-circle-fill me-1"></i> Qayıb
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
+                                                            <i class="bi bi-info-circle-fill me-1"></i> İcazəli
+                                                        </span>
+                                                    }
+                                                </td>
+                                                <td class="pe-4 text-muted">
+                                                    @(string.IsNullOrEmpty(h.Note) ? "—" : h.Note)
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

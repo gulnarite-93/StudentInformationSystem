@@ -1,0 +1,154 @@
+@model StudentInformationSystem.Web.Models.TeacherCourseAttendanceOverviewViewModel
+@{
+    ViewData["Title"] = $"{Model.Course.Code} - Davamiyyət Sessiyaları";
+}
+
+<div class="mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a asp-action="Attendance">Davamiyyət</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@Model.Course.Code</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-calendar3 text-primary me-2"></i>Dərs Sessiyaları və Davamiyyət
+            </h2>
+            <p class="text-muted mb-0">
+                <strong>@Model.Course.Code - @Model.Course.Name</strong> fənni üzrə qeydə alınmış dərslərin siyahısı.
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="CreateAttendanceSession" asp-route-courseId="@Model.Course.Id" class="btn btn-success btn-sm fw-semibold">
+                <i class="bi bi-plus-circle me-1"></i> Yeni Dərs Sessiyası
+            </a>
+            <a asp-action="Attendance" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Fənlərə Qayıt
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Bağla"></button>
+    </div>
+}
+
+<!-- Kurs Xülasəsi -->
+<div class="card shadow-sm border-0 rounded-3 mb-4 bg-light">
+    <div class="card-body p-3">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-3">
+                <span class="text-muted small d-block">Kurs:</span>
+                <span class="badge bg-secondary font-monospace">@Model.Course.Code</span>
+                <strong class="text-dark ms-1">@Model.Course.Name</strong>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted small d-block">Akademik Dövr:</span>
+                <strong class="text-dark">@Model.Course.TermName</strong>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted small d-block">Qeydiyyatda Tələbə:</span>
+                <span class="badge bg-info text-dark">@Model.Course.EnrolledStudentsCount tələbə</span>
+            </div>
+            <div class="col-md-3 text-md-end">
+                <span class="text-muted small d-block">Keçirilmiş Dərs Sayı:</span>
+                <span class="badge bg-primary fs-6 px-3 py-1">@Model.Sessions.Count dərs</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!Model.Sessions.Any())
+{
+    <div class="card shadow-sm border-0 rounded-4 text-center py-5">
+        <div class="card-body">
+            <i class="bi bi-calendar-x display-3 text-muted"></i>
+            <h4 class="mt-3 text-dark fw-bold">Bu fənn üzrə hələ heç bir dərs sessiyası qeydə alınmayıb</h4>
+            <p class="text-muted col-md-6 mx-auto">
+                İlk dərsin davamiyyətini daxil etmək üçün yuxarıdakı "Yeni Dərs Sessiyası" düyməsindən istifadə edin.
+            </p>
+            <a asp-action="CreateAttendanceSession" asp-route-courseId="@Model.Course.Id" class="btn btn-success btn-sm mt-2">
+                <i class="bi bi-plus-circle me-1"></i> İlk Dərs Sessiyasını Yarat
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Dərs Tarixi</th>
+                        <th>Dərsin Mövzusu</th>
+                        <th>Cəmi Tələbə</th>
+                        <th>Gəldi (İştirak)</th>
+                        <th>Qayıb (Gəlmədi)</th>
+                        <th>İcazəli</th>
+                        <th class="text-end pe-4">Əməliyyatlar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.Sessions)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <strong class="text-dark"><i class="bi bi-calendar-event text-primary me-2"></i>@s.LessonDate.ToString("dd.MM.yyyy")</strong>
+                            </td>
+                            <td>
+                                <span class="fw-semibold text-secondary">@s.LessonTopic</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">@s.TotalStudents</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                                    <i class="bi bi-check-circle me-1"></i>@s.PresentCount
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                                    <i class="bi bi-x-circle me-1"></i>@s.AbsentCount
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
+                                    <i class="bi bi-info-circle me-1"></i>@s.ExcusedCount
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a asp-action="EditAttendanceSession" asp-route-courseId="@s.CourseId" asp-route-date="@s.LessonDate.ToString("yyyy-MM-dd")"
+                                   class="btn btn-outline-primary btn-sm me-1" title="Davamiyyəti Dəyiş">
+                                    <i class="bi bi-pencil me-1"></i> Redaktə Et
+                                </a>
+                                <form asp-action="DeleteAttendanceSession" method="post" class="d-inline"
+                                      onsubmit="return confirm('@s.LessonDate.ToString("dd.MM.yyyy") tarixli dərs sessiyasını silmək istədiyinizdən əminsiniz?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="courseId" value="@s.CourseId" />
+                                    <input type="hidden" name="date" value="@s.LessonDate.ToString("yyyy-MM-dd")" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Sessiyanı Sil">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

@@ -105,19 +105,8 @@ namespace StudentInformationSystem.Web.Services
                 return (true, result, null);
             }
 
-            try
-            {
-                using var doc = JsonDocument.Parse(content);
-                if (doc.RootElement.TryGetProperty("message", out var msg))
-                {
-                    return (false, default, msg.GetString());
-                }
-            }
-            catch
-            {
-            }
-
-            return (false, default, "Əlavə edilərkən xəta baş verdi.");
+            var error = ExtractErrorMessage(content, response, "Əlavə edilərkən xəta baş verdi.");
+            return (false, default, error);
         }
 
         public async Task<bool> PutAsync<TRequest>(string endpoint, TRequest data)
@@ -136,20 +125,9 @@ namespace StudentInformationSystem.Web.Services
                 return (true, null);
             }
 
-            try
-            {
-                var content = await response.Content.ReadAsStringAsync();
-                using var doc = JsonDocument.Parse(content);
-                if (doc.RootElement.TryGetProperty("message", out var msg))
-                {
-                    return (false, msg.GetString());
-                }
-            }
-            catch
-            {
-            }
-
-            return (false, "Yeniləmə zamanı xəta baş verdi.");
+            var content = await response.Content.ReadAsStringAsync();
+            var error = ExtractErrorMessage(content, response, "Yeniləmə zamanı xəta baş verdi.");
+            return (false, error);
         }
 
         public async Task<bool> DeleteAsync(string endpoint)
@@ -168,20 +146,74 @@ namespace StudentInformationSystem.Web.Services
                 return (true, null);
             }
 
+            var content = await response.Content.ReadAsStringAsync();
+            var error = ExtractErrorMessage(content, response, "Silinmə zamanı xəta baş verdi.");
+            return (false, error);
+        }
+
+        private static string ExtractErrorMessage(string content, HttpResponseMessage response, string fallback)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return $"{fallback} (HTTP {(int)response.StatusCode})";
+            }
+
             try
             {
-                var content = await response.Content.ReadAsStringAsync();
                 using var doc = JsonDocument.Parse(content);
-                if (doc.RootElement.TryGetProperty("message", out var msg))
+                var root = doc.RootElement;
+
+                if (root.TryGetProperty("message", out var msg) && !string.IsNullOrWhiteSpace(msg.GetString()))
                 {
-                    return (false, msg.GetString());
+                    return msg.GetString()!;
+                }
+
+                if (root.TryGetProperty("detail", out var detail) && !string.IsNullOrWhiteSpace(detail.GetString()))
+                {
+                    return detail.GetString()!;
+                }
+
+                if (root.TryGetProperty("errors", out var errors) && errors.ValueKind == JsonValueKind.Object)
+                {
+                    var errorList = new List<string>();
+                    foreach (var prop in errors.EnumerateObject())
+                    {
+                        if (prop.Value.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var item in prop.Value.EnumerateArray())
+                            {
+                                var text = item.GetString();
+                                if (!string.IsNullOrEmpty(text)) errorList.Add(text);
+                            }
+                        }
+                        else
+                        {
+                            var text = prop.Value.GetString();
+                            if (!string.IsNullOrEmpty(text)) errorList.Add(text);
+                        }
+                    }
+
+                    if (errorList.Count > 0)
+                    {
+                        return string.Join("; ", errorList);
+                    }
+                }
+
+                if (root.TryGetProperty("title", out var title) && !string.IsNullOrWhiteSpace(title.GetString()))
+                {
+                    return title.GetString()!;
                 }
             }
             catch
             {
             }
 
-            return (false, "Silinmə zamanı xəta baş verdi.");
+            if (content.Length < 300 && !content.TrimStart().StartsWith("<"))
+            {
+                return content.Trim();
+            }
+
+            return $"{fallback} (HTTP {(int)response.StatusCode})";
         }
     }
 }
