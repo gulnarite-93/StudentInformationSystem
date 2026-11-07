@@ -281,7 +281,7 @@ namespace StudentInformationSystem.API.Data
             await context.Courses.AddRangeAsync(course1, course2, course3);
             await context.SaveChangesAsync();
 
-            // 6. İlkin Elan (Ümumi müəssisə üzrə)
+            // 6. İlkin Elanlar (Ümumi müəssisə üzrə və fənn üzrə)
             var announcement = new Announcement
             {
                 Title = "Yeni Tədris İliniz Mübarək!",
@@ -291,7 +291,16 @@ namespace StudentInformationSystem.API.Data
                 CreatedAt = DateTime.UtcNow
             };
 
-            await context.Announcements.AddAsync(announcement);
+            var courseAnnouncement = new Announcement
+            {
+                Title = "Laboratoriya işləri haqqında elan",
+                Content = "Hörmətli tələbələr, gələn həftə IT102 fənni üzrə laboratoriya işlərinin müdafiəsi keçiriləcəkdir. Hər kəsin vaxtında iştirakı vacibdir.",
+                AuthorId = teacher2.Id,
+                CourseId = course2.Id,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await context.Announcements.AddRangeAsync(announcement, courseAnnouncement);
             await context.SaveChangesAsync();
 
             // 7. Qeydiyyatlar və İlkin Qiymətlər

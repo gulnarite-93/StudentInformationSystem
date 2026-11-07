@@ -45,6 +45,8 @@
                                         <li><a class="dropdown-item" asp-controller="Admin" asp-action="CourseGrades" asp-route-courseId="2"><i class="bi bi-award me-2"></i>Fənn Qiymətləri (IT102 Jurnalı)</a></li>
                                         <li><a class="dropdown-item" asp-controller="Admin" asp-action="StudentTranscript" asp-route-studentId="4"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Aydan Məmmədova Transkripti</a></li>
                                         <li><a class="dropdown-item" asp-controller="Admin" asp-action="StudentDashboard" asp-route-studentId="4"><i class="bi bi-speedometer2 me-2"></i>Aydan Məmmədova Paneli (GPA)</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="Announcements" asp-action="Index"><i class="bi bi-megaphone-fill me-2 text-warning"></i>Elanlar İdarəetməsi (F7)</a></li>
                                     </ul>
                                 </li>
                             }
@@ -76,6 +78,12 @@
                                     </a>
                                 </li>
                             }
+
+                            <li class="nav-item">
+                                <a class="nav-link text-white fw-semibold" asp-controller="Announcements" asp-action="Index">
+                                    <i class="bi bi-megaphone me-1 text-warning"></i> Elanlar
+                                </a>
+                            </li>
                         }
                     </ul>
 

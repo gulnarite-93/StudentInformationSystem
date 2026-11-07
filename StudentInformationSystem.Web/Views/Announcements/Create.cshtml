@@ -1,0 +1,93 @@
+@model StudentInformationSystem.Web.Models.AnnouncementFormViewModel
+@{
+    ViewData["Title"] = "Yeni Elan Paylaş";
+}
+
+<div class="container py-4" style="max-width: 800px;">
+    <!-- Geri qayıt və başlıq -->
+    <div class="mb-4">
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill mb-2">
+            <i class="bi bi-arrow-left me-1"></i> Bütün Elanlara Qayıt
+        </a>
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="bi bi-pencil-square text-primary me-2"></i>Yeni Elan Paylaş
+        </h2>
+        <p class="text-muted">
+            @(Model.IsAdmin 
+                ? "Müəssisə üzrə bütün istifadəçilərə və ya xüsusi kurs tələbələrinə elan göndərin." 
+                : "Tədris etdiyiniz fənni seçərək yalnız həmin fənnin tələbələrinə elan göndərin.")
+        </p>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger rounded-4 shadow-sm mb-4">
+            <h6 class="fw-bold mb-2"><i class="bi bi-exclamation-triangle-fill me-2"></i>Zəhmət olmasa xətaları düzəldin:</h6>
+            <div asp-validation-summary="All" class="text-danger small ps-3"></div>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white">
+        <div class="card-body p-4 p-md-5">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+
+                <!-- Hədəf Auditoriya / Kurs Seçimi -->
+                <div class="mb-4">
+                    <label asp-for="CourseId" class="form-label fw-bold text-dark">
+                        <i class="bi bi-bullseye text-primary me-1"></i> Hədəf Auditoriya / Fənn
+                    </label>
+                    <select asp-for="CourseId" asp-items="Model.CourseOptions" class="form-select form-select-lg rounded-3 border-secondary-subtle">
+                    </select>
+                    <span asp-validation-for="CourseId" class="text-danger small"></span>
+                    <div class="form-text mt-2">
+                        @if (Model.IsAdmin)
+                        {
+                            <span><i class="bi bi-info-circle me-1"></i> "Müəssisə üzrə" seçildikdə elanı hər kəs (Admin, Müəllimlər və bütün Tələbələr) görəcək. Fənn seçildikdə yalnız həmin fənnin iştirakçıları görəcək.</span>
+                        }
+                        else
+                        {
+                            <span><i class="bi bi-info-circle me-1"></i> Müəllimlər yalnız öz tədris etdikləri fənlər üzrə elan göndərə bilər. Elan yalnız fənnə yazılmış tələbələrə görünəcək.</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Elanın Başlığı -->
+                <div class="mb-4">
+                    <label asp-for="Title" class="form-label fw-bold text-dark">
+                        <i class="bi bi-type-h1 text-primary me-1"></i> Elanın Başlığı <span class="text-danger">*</span>
+                    </label>
+                    <input asp-for="Title" class="form-control form-control-lg rounded-3 border-secondary-subtle" 
+                           placeholder="Məsələn: Semestr İmtahanlarının Qrafiki haqqında" />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+
+                <!-- Elanın Məzmunu -->
+                <div class="mb-4">
+                    <label asp-for="Content" class="form-label fw-bold text-dark">
+                        <i class="bi bi-textarea-t text-primary me-1"></i> Elanın Mətni <span class="text-danger">*</span>
+                    </label>
+                    <textarea asp-for="Content" rows="6" class="form-control rounded-3 border-secondary-subtle" 
+                              placeholder="Elanın ətraflı məzmununu buraya qeyd edin..."></textarea>
+                    <span asp-validation-for="Content" class="text-danger small"></span>
+                </div>
+
+                <hr class="my-4 text-muted">
+
+                <!-- Düymələr -->
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2 rounded-pill">
+                        Ləğv et
+                    </a>
+                    <button type="submit" class="btn btn-primary px-5 py-2 rounded-pill shadow-sm">
+                        <i class="bi bi-send-fill me-1"></i> Elanı Paylaş
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
