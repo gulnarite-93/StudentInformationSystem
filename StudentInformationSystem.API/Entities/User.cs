@@ -13,6 +13,8 @@ namespace StudentInformationSystem.API.Entities
 
         // F1: Tələbə profili xüsusiyyətləri
         public string? StudentNumber { get; set; } // Məs: ST2026001
+        public string? PhoneNumber { get; set; }
+        public DateTime? DateOfBirth { get; set; }
         public int? AcademicYear { get; set; } // 1, 2, 3, 4-cü kurs
         public int? ProgrammeId { get; set; }
         public Programme? Programme { get; set; }
