@@ -129,9 +129,17 @@
                                         <input type="hidden" name="Records[@i].StudentId" value="@Model.Records[i].StudentId" />
                                         <input type="hidden" name="Records[@i].StudentName" value="@Model.Records[i].StudentName" />
                                         <input type="hidden" name="Records[@i].StudentNumber" value="@Model.Records[i].StudentNumber" />
+                                        <input type="hidden" name="Records[@i].CourseAttendancePercentage" value="@Model.Records[i].CourseAttendancePercentage" />
+                                        <input type="hidden" name="Records[@i].HasAttendanceWarning" value="@Model.Records[i].HasAttendanceWarning.ToString().ToLower()" />
                                     </td>
                                     <td>
                                         <strong class="text-dark">@Model.Records[i].StudentName</strong>
+                                        @if (Model.Records[i].HasAttendanceWarning)
+                                        {
+                                            <span class="badge bg-danger ms-2 px-2 py-1 shadow-sm">
+                                                <i class="bi bi-exclamation-triangle-fill me-1"></i>Diqqət: davamiyyət aşağıdır (@(Model.Records[i].CourseAttendancePercentage)%)
+                                            </span>
+                                        }
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group" aria-label="Status">

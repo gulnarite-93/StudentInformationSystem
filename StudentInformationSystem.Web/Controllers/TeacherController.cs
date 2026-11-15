@@ -72,10 +72,14 @@ namespace StudentInformationSystem.Web.Controllers
             var sessions = await _apiService.GetAsync<List<LessonSessionSummaryViewModel>>($"api/attendance/course/{courseId}/sessions")
                 ?? new List<LessonSessionSummaryViewModel>();
 
+            var studentAttendances = await _apiService.GetAsync<List<CourseStudentAttendanceViewModel>>($"api/attendance/course/{courseId}/students-attendance")
+                ?? new List<CourseStudentAttendanceViewModel>();
+
             var model = new TeacherCourseAttendanceOverviewViewModel
             {
                 Course = course,
-                Sessions = sessions
+                Sessions = sessions,
+                StudentAttendances = studentAttendances
             };
 
             return View(model);

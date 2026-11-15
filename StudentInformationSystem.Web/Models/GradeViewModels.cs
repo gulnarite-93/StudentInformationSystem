@@ -142,6 +142,8 @@ namespace StudentInformationSystem.Web.Models
         public decimal AttendancePercentage { get; set; }
         public int TotalLessons { get; set; }
         public int AttendedLessons { get; set; }
+        public bool HasAttendanceWarning { get; set; }
+        public List<string> LowAttendanceCourses { get; set; } = new();
         public List<DashboardAnnouncementViewModel> RecentAnnouncements { get; set; } = new();
         public List<DashboardCourseViewModel> CurrentCourses { get; set; } = new();
     }
@@ -167,5 +169,7 @@ namespace StudentInformationSystem.Web.Models
         public decimal? TotalScore { get; set; }
         public string? LetterGrade { get; set; }
         public decimal? GradePoint { get; set; }
+        public double? AttendancePercentage { get; set; }
+        public bool HasAttendanceWarning { get; set; }
     }
 }

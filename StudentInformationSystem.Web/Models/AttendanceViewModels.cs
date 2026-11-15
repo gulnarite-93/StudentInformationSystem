@@ -10,6 +10,22 @@ namespace StudentInformationSystem.Web.Models
         public string? StudentNumber { get; set; }
         public string Status { get; set; } = "Present"; // Present (Gəldi), Absent (Gəlmədi), Excused (İcazəli)
         public string? Note { get; set; }
+        public double CourseAttendancePercentage { get; set; }
+        public bool HasAttendanceWarning { get; set; }
+    }
+
+    public class CourseStudentAttendanceViewModel
+    {
+        public int StudentId { get; set; }
+        public string StudentName { get; set; } = string.Empty;
+        public string? StudentNumber { get; set; }
+        public string? Email { get; set; }
+        public int TotalLessons { get; set; }
+        public int PresentCount { get; set; }
+        public int AbsentCount { get; set; }
+        public int ExcusedCount { get; set; }
+        public double AttendancePercentage { get; set; }
+        public bool HasAttendanceWarning { get; set; }
     }
 
     public class LessonSessionSummaryViewModel
@@ -51,6 +67,7 @@ namespace StudentInformationSystem.Web.Models
     {
         public CourseViewModel Course { get; set; } = new();
         public List<LessonSessionSummaryViewModel> Sessions { get; set; } = new();
+        public List<CourseStudentAttendanceViewModel> StudentAttendances { get; set; } = new();
     }
 
     public class StudentAttendanceItemViewModel
@@ -75,6 +92,7 @@ namespace StudentInformationSystem.Web.Models
         public int AbsentCount { get; set; }
         public int ExcusedCount { get; set; }
         public double AttendancePercentage { get; set; }
+        public bool HasAttendanceWarning => TotalLessons > 0 && AttendancePercentage < 75.0;
         public List<StudentAttendanceItemViewModel> History { get; set; } = new();
     }
 
@@ -85,6 +103,9 @@ namespace StudentInformationSystem.Web.Models
         public int OverallPresentCount => Courses.Sum(c => c.PresentCount);
         public int OverallAbsentCount => Courses.Sum(c => c.AbsentCount);
         public int OverallExcusedCount => Courses.Sum(c => c.ExcusedCount);
-        public double OverallPercentage => OverallTotalLessons > 0 ? Math.Round((double)OverallPresentCount / OverallTotalLessons * 100, 1) : 100.0;
+        public double OverallPercentage => OverallTotalLessons > 0 
+            ? Math.Round((double)(OverallPresentCount + OverallExcusedCount) / OverallTotalLessons * 100, 1) 
+            : 100.0;
+        public bool HasAnyCourseWarning => Courses.Any(c => c.HasAttendanceWarning);
     }
 }

@@ -75,6 +75,23 @@
     </div>
 </div>
 
+@if (Model.HasAnyCourseWarning)
+{
+    <div class="alert alert-danger border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center">
+        <div class="rounded-circle bg-danger text-white p-3 me-3 d-flex align-items-center justify-content-center">
+            <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+        </div>
+        <div>
+            <h5 class="fw-bold mb-1 text-danger">
+                <i class="bi bi-bell-fill me-1"></i>Diqqət: Davamiyyətiniz aşağı olan fənlər var!
+            </h5>
+            <p class="mb-0 text-dark small">
+                Aşağıda qırmızı ilə işarələnmiş kurslar üzrə davamiyyət faiziniz <strong>75%-dən aşağıdır</strong>. Qayıb limitinə görə imtahana buraxılmama riski ilə üzləşməmək üçün dərslərdə iştirakınızı təmin edin.
+            </p>
+        </div>
+    </div>
+}
+
 @if (!Model.Courses.Any())
 {
     <div class="card shadow-sm border-0 rounded-4 text-center py-5">
@@ -106,6 +123,12 @@ else
                                 <span class="badge bg-secondary font-monospace px-2 py-1 me-2">@c.CourseCode</span>
                                 <strong class="fs-5 text-dark">@c.CourseName</strong>
                                 <span class="badge bg-primary rounded-pill ms-2">@c.Credits KREDİT</span>
+                                @if (isLimitWarning)
+                                {
+                                    <span class="badge bg-danger text-white px-2 py-1 ms-2 shadow-sm">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>Diqqət: davamiyyətiniz aşağıdır
+                                    </span>
+                                }
                                 <div class="small text-muted mt-1">
                                     <i class="bi bi-person-circle me-1"></i>Müəllim: <strong>@c.TeacherName</strong> | Semestr: @c.TermName
                                 </div>
@@ -127,7 +150,7 @@ else
                                             İcazəli: <strong>@c.ExcusedCount</strong>
                                         </span>
                                     }
-                                    <span class="badge @(c.AttendancePercentage >= 75 ? "bg-success" : (c.AttendancePercentage >= 60 ? "bg-warning text-dark" : "bg-danger")) fs-6 px-3 py-2">
+                                    <span class="badge @(c.AttendancePercentage >= 75 ? "bg-success" : "bg-danger") fs-6 px-3 py-2">
                                         @c.AttendancePercentage%
                                     </span>
                                 </div>
@@ -144,9 +167,12 @@ else
 
                         @if (isLimitWarning)
                         {
-                            <div class="alert alert-warning py-1 px-3 mt-2 mb-0 small rounded-2">
-                                <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                <strong>Diqqət:</strong> Bu fənn üzrə davamiyyət faiziniz 75%-dən aşağıdır. Qayıb limitinə görə imtahana buraxılmama riski yarana bilər.
+                            <div class="alert alert-danger py-2 px-3 mt-3 mb-0 small rounded-3 border-danger shadow-sm d-flex align-items-center">
+                                <i class="bi bi-exclamation-triangle-fill fs-5 text-danger me-2"></i>
+                                <div>
+                                    <strong class="text-danger">Diqqət: davamiyyətiniz aşağıdır (@c.AttendancePercentage%)!</strong>
+                                    Bu fənn üzrə davamiyyət faiziniz 75%-dən aşağıdır. Qayıb limitinə görə imtahana buraxılmama riski yarana bilər.
+                                </div>
                             </div>
                         }
                     </div>

@@ -28,7 +28,7 @@ namespace StudentInformationSystem.API.Services.Implementations
             _passwordHasher = passwordHasher;
         }
 
-        public async Task<IReadOnlyList<StudentDto>> GetAllAsync(string? search = null, int? programmeId = null, int? academicYear = null)
+        public async Task<IReadOnlyList<StudentDto>> GetAllAsync(string? search = null, int? programmeId = null, int? academicYear = null, int? departmentId = null)
         {
             var query = _userRepo.Query()
                 .Include(u => u.Programme)
@@ -44,6 +44,11 @@ namespace StudentInformationSystem.API.Services.Implementations
                     (u.StudentNumber != null && u.StudentNumber.ToLower().Contains(term)) ||
                     u.Email.ToLower().Contains(term) ||
                     u.Username.ToLower().Contains(term));
+            }
+
+            if (departmentId.HasValue && departmentId.Value > 0)
+            {
+                query = query.Where(u => u.Programme != null && u.Programme.DepartmentId == departmentId.Value);
             }
 
             if (programmeId.HasValue && programmeId.Value > 0)

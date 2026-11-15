@@ -342,10 +342,12 @@ namespace StudentInformationSystem.API.Services.Implementations
                 .ToListAsync();
 
             var totalLessons = attendances.Count;
-            var attended = attendances.Count(a => a.IsPresent || a.Note == "Excused" || a.Note == "İcazəli");
+            var attended = attendances.Count(a => a.Status == AttendanceStatus.Present || a.Status == AttendanceStatus.Excused || (string.IsNullOrEmpty(a.Status) && a.IsPresent) || a.Note == "Excused" || a.Note == "İcazəli");
             var attendancePercentage = totalLessons > 0
                 ? Math.Round((decimal)attended / totalLessons * 100, 1)
                 : 100.0m;
+
+            var lowAttendanceCourses = new List<string>();
 
             // Son elanlar (müəssisə üzrə və ya tələbənin kursları üzrə)
             var enrolledCourseIds = enrollments.Select(e => e.CourseId).ToList();
@@ -367,17 +369,33 @@ namespace StudentInformationSystem.API.Services.Implementations
                 CreatedAt = a.CreatedAt
             }).ToList();
 
-            var currentCourses = enrollments.Select(e => new DashboardCourseDto
+            var currentCourses = enrollments.Select(e =>
             {
-                CourseId = e.CourseId,
-                CourseCode = e.Course.Code,
-                CourseName = e.Course.Name,
-                Credits = e.Course.Credits,
-                TeacherName = e.Course.Teacher != null ? $"{e.Course.Teacher.FirstName} {e.Course.Teacher.LastName}".Trim() : "Təyin olunmayıb",
-                HasGrade = e.Grade != null,
-                TotalScore = e.Grade?.TotalScore,
-                LetterGrade = e.Grade?.LetterGrade,
-                GradePoint = e.Grade?.GradePoint
+                var courseAtts = attendances.Where(a => a.CourseId == e.CourseId).ToList();
+                var cTotal = courseAtts.Count;
+                var cAttended = courseAtts.Count(a => a.Status == AttendanceStatus.Present || a.Status == AttendanceStatus.Excused || (string.IsNullOrEmpty(a.Status) && a.IsPresent) || a.Note == "Excused" || a.Note == "İcazəli");
+                double? cPct = cTotal > 0 ? Math.Round(((double)cAttended / cTotal) * 100, 1) : null;
+                bool cWarning = cTotal > 0 && cPct.HasValue && cPct.Value < 75.0;
+
+                if (cWarning)
+                {
+                    lowAttendanceCourses.Add($"{e.Course.Code} ({cPct!.Value:0.#}%)");
+                }
+
+                return new DashboardCourseDto
+                {
+                    CourseId = e.CourseId,
+                    CourseCode = e.Course.Code,
+                    CourseName = e.Course.Name,
+                    Credits = e.Course.Credits,
+                    TeacherName = e.Course.Teacher != null ? $"{e.Course.Teacher.FirstName} {e.Course.Teacher.LastName}".Trim() : "Təyin olunmayıb",
+                    HasGrade = e.Grade != null,
+                    TotalScore = e.Grade?.TotalScore,
+                    LetterGrade = e.Grade?.LetterGrade,
+                    GradePoint = e.Grade?.GradePoint,
+                    AttendancePercentage = cPct,
+                    HasAttendanceWarning = cWarning
+                };
             }).ToList();
 
             return new StudentDashboardDto
@@ -393,6 +411,8 @@ namespace StudentInformationSystem.API.Services.Implementations
                 AttendancePercentage = attendancePercentage,
                 TotalLessons = totalLessons,
                 AttendedLessons = attended,
+                HasAttendanceWarning = lowAttendanceCourses.Any(),
+                LowAttendanceCourses = lowAttendanceCourses,
                 RecentAnnouncements = announcementDtos,
                 CurrentCourses = currentCourses
             };

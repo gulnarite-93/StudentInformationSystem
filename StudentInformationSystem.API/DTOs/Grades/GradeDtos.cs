@@ -128,6 +128,8 @@ namespace StudentInformationSystem.API.DTOs.Grades
         public decimal AttendancePercentage { get; set; }
         public int TotalLessons { get; set; }
         public int AttendedLessons { get; set; }
+        public bool HasAttendanceWarning { get; set; }
+        public List<string> LowAttendanceCourses { get; set; } = new();
         public List<DashboardAnnouncementDto> RecentAnnouncements { get; set; } = new();
         public List<DashboardCourseDto> CurrentCourses { get; set; } = new();
     }
@@ -153,6 +155,8 @@ namespace StudentInformationSystem.API.DTOs.Grades
         public decimal? TotalScore { get; set; }
         public string? LetterGrade { get; set; }
         public decimal? GradePoint { get; set; }
+        public double? AttendancePercentage { get; set; }
+        public bool HasAttendanceWarning { get; set; }
     }
 
     public class TeacherGradeCourseSummaryDto

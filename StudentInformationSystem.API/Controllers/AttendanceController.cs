@@ -60,6 +60,26 @@ namespace StudentInformationSystem.API.Controllers
             }
         }
 
+        // Kurs üzrə bütün tələbələrin davamiyyət statistikası
+        [HttpGet("course/{courseId:int}/students-attendance")]
+        [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Teacher}")]
+        public async Task<ActionResult<IReadOnlyList<CourseStudentAttendanceDto>>> GetCourseStudentsAttendance(int courseId)
+        {
+            var currentUserId = GetCurrentUserId();
+            var currentUserRole = GetCurrentUserRole();
+
+            try
+            {
+                var list = await _attendanceService.GetCourseStudentsAttendanceAsync(courseId, currentUserId, currentUserRole);
+                return Ok(list);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kursa yazılmış tələbələrin davamiyyət məlumatları alınarkən xəta baş verdi. CourseId: {CourseId}", courseId);
+                return StatusCode(500, new { message = $"Tələbə davamiyyəti alına bilmədi: {FormatExceptionMessage(ex)}" });
+            }
+        }
+
         // Yeni dərs sessiyası yaratmaq üçün kursa yazılmış tələbələrin şablon siyahısı
         [HttpGet("course/{courseId:int}/template")]
         [Authorize(Roles = $"{UserRoles.Admin},{UserRoles.Teacher}")]

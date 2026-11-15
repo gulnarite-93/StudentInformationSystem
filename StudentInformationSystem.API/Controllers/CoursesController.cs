@@ -24,9 +24,10 @@ namespace StudentInformationSystem.API.Controllers
             [FromQuery] string? search = null,
             [FromQuery] int? termId = null,
             [FromQuery] int? programmeId = null,
-            [FromQuery] int? teacherId = null)
+            [FromQuery] int? teacherId = null,
+            [FromQuery] int? departmentId = null)
         {
-            var courses = await _courseService.GetAllAsync(search, termId, programmeId, teacherId);
+            var courses = await _courseService.GetAllAsync(search, termId, programmeId, teacherId, departmentId);
             return Ok(courses);
         }
 

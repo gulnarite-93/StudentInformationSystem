@@ -89,6 +89,10 @@ namespace StudentInformationSystem.API.Services.Implementations
 
             if (!attendances.Any()) return null;
 
+            var allCourseAttendances = await _attendanceRepo.Query()
+                .Where(a => a.CourseId == courseId)
+                .ToListAsync();
+
             var topic = attendances.FirstOrDefault(a => !string.IsNullOrEmpty(a.LessonTopic))?.LessonTopic ?? string.Empty;
 
             return new LessonSessionDetailsDto
@@ -98,16 +102,28 @@ namespace StudentInformationSystem.API.Services.Implementations
                 CourseName = course.Name,
                 LessonDate = targetDate,
                 LessonTopic = topic,
-                Records = attendances.Select(a => new AttendanceRecordDto
+                Records = attendances.Select(a => 
                 {
-                    Id = a.Id,
-                    StudentId = a.StudentId,
-                    StudentName = $"{a.Student.FirstName} {a.Student.LastName}".Trim(),
-                    StudentNumber = a.Student.StudentNumber,
-                    Status = string.IsNullOrEmpty(a.Status) 
-                        ? (a.IsPresent ? AttendanceStatus.Present : AttendanceStatus.Absent)
-                        : a.Status,
-                    Note = a.Note
+                    var sAtts = allCourseAttendances.Where(x => x.StudentId == a.StudentId).ToList();
+                    var sTotal = sAtts.Count;
+                    var sPresent = sAtts.Count(x => x.Status == AttendanceStatus.Present || (string.IsNullOrEmpty(x.Status) && x.IsPresent));
+                    var sExcused = sAtts.Count(x => x.Status == AttendanceStatus.Excused || x.Note == "Excused" || x.Note == "İcazəli");
+                    double sPct = sTotal > 0 ? Math.Round(((double)(sPresent + sExcused) / sTotal) * 100, 1) : 100.0;
+                    bool sWarning = sTotal > 0 && sPct < 75.0;
+
+                    return new AttendanceRecordDto
+                    {
+                        Id = a.Id,
+                        StudentId = a.StudentId,
+                        StudentName = $"{a.Student.FirstName} {a.Student.LastName}".Trim(),
+                        StudentNumber = a.Student.StudentNumber,
+                        Status = string.IsNullOrEmpty(a.Status) 
+                            ? (a.IsPresent ? AttendanceStatus.Present : AttendanceStatus.Absent)
+                            : a.Status,
+                        Note = a.Note,
+                        CourseAttendancePercentage = sPct,
+                        HasAttendanceWarning = sWarning
+                    };
                 }).ToList()
             };
         }
@@ -129,6 +145,11 @@ namespace StudentInformationSystem.API.Services.Implementations
                 throw new UnauthorizedAccessException(error);
             }
 
+            // Kurs üzrə əvvəlki bütün davamiyyət qeydləri
+            var allCourseAttendances = await _attendanceRepo.Query()
+                .Where(a => a.CourseId == courseId)
+                .ToListAsync();
+
             // Kursa aktiv yazılmış bütün tələbələr
             var enrolledStudents = await _enrollmentRepo.Query()
                 .Include(e => e.Student)
@@ -145,14 +166,26 @@ namespace StudentInformationSystem.API.Services.Implementations
                 CourseName = course.Name,
                 LessonDate = DateTime.Today,
                 LessonTopic = string.Empty,
-                Records = enrolledStudents.Select(s => new AttendanceRecordDto
+                Records = enrolledStudents.Select(s => 
                 {
-                    Id = 0,
-                    StudentId = s.Id,
-                    StudentName = $"{s.FirstName} {s.LastName}".Trim(),
-                    StudentNumber = s.StudentNumber,
-                    Status = AttendanceStatus.Present,
-                    Note = string.Empty
+                    var sAtts = allCourseAttendances.Where(x => x.StudentId == s.Id).ToList();
+                    var sTotal = sAtts.Count;
+                    var sPresent = sAtts.Count(x => x.Status == AttendanceStatus.Present || (string.IsNullOrEmpty(x.Status) && x.IsPresent));
+                    var sExcused = sAtts.Count(x => x.Status == AttendanceStatus.Excused || x.Note == "Excused" || x.Note == "İcazəli");
+                    double sPct = sTotal > 0 ? Math.Round(((double)(sPresent + sExcused) / sTotal) * 100, 1) : 100.0;
+                    bool sWarning = sTotal > 0 && sPct < 75.0;
+
+                    return new AttendanceRecordDto
+                    {
+                        Id = 0,
+                        StudentId = s.Id,
+                        StudentName = $"{s.FirstName} {s.LastName}".Trim(),
+                        StudentNumber = s.StudentNumber,
+                        Status = AttendanceStatus.Present,
+                        Note = string.Empty,
+                        CourseAttendancePercentage = sPct,
+                        HasAttendanceWarning = sWarning
+                    };
                 }).ToList()
             };
         }
@@ -352,7 +385,8 @@ namespace StudentInformationSystem.API.Services.Implementations
                 double percentage = 100.0;
                 if (total > 0)
                 {
-                    percentage = Math.Round(((double)present / total) * 100, 1);
+                    // Hesablama: (Gəldi + İcazəli) / ümumi sessiya sayı
+                    percentage = Math.Round(((double)(present + excused) / total) * 100, 1);
                 }
 
                 result.Add(new StudentCourseAttendanceSummaryDto
@@ -370,6 +404,7 @@ namespace StudentInformationSystem.API.Services.Implementations
                     AbsentCount = absent,
                     ExcusedCount = excused,
                     AttendancePercentage = percentage,
+                    HasAttendanceWarning = total > 0 && percentage < 75.0,
                     History = courseAttendances.Select(a => new StudentAttendanceItemDto
                     {
                         Id = a.Id,
@@ -380,6 +415,65 @@ namespace StudentInformationSystem.API.Services.Implementations
                             : a.Status,
                         Note = a.Note
                     }).ToList()
+                });
+            }
+
+            return result;
+        }
+
+        public async Task<IReadOnlyList<CourseStudentAttendanceDto>> GetCourseStudentsAttendanceAsync(int courseId, int currentUserId, string currentUserRole)
+        {
+            var course = await _courseRepo.Query()
+                .Include(c => c.Teacher)
+                .FirstOrDefaultAsync(c => c.Id == courseId);
+
+            if (course == null) return Array.Empty<CourseStudentAttendanceDto>();
+
+            var (allowed, _) = VerifyCourseAccess(course, currentUserId, currentUserRole);
+            if (!allowed) return Array.Empty<CourseStudentAttendanceDto>();
+
+            var enrollments = await _enrollmentRepo.Query()
+                .Include(e => e.Student)
+                .Where(e => e.CourseId == courseId && (e.Status == "Enrolled" || e.Status == "Completed"))
+                .OrderBy(e => e.Student.LastName)
+                .ThenBy(e => e.Student.FirstName)
+                .ToListAsync();
+
+            var attendances = await _attendanceRepo.Query()
+                .Where(a => a.CourseId == courseId)
+                .ToListAsync();
+
+            var result = new List<CourseStudentAttendanceDto>();
+
+            foreach (var enr in enrollments)
+            {
+                var studentAtts = attendances.Where(a => a.StudentId == enr.StudentId).ToList();
+                var total = studentAtts.Count;
+                var present = studentAtts.Count(a => a.Status == AttendanceStatus.Present || (string.IsNullOrEmpty(a.Status) && a.IsPresent));
+                var absent = studentAtts.Count(a => a.Status == AttendanceStatus.Absent || (string.IsNullOrEmpty(a.Status) && !a.IsPresent && a.Note != "Excused"));
+                var excused = studentAtts.Count(a => a.Status == AttendanceStatus.Excused || a.Note == "Excused" || a.Note == "İcazəli");
+
+                // Hesablama: (Gəldi + İcazəli) / ümumi sessiya sayı
+                double pct = 100.0;
+                if (total > 0)
+                {
+                    pct = Math.Round(((double)(present + excused) / total) * 100, 1);
+                }
+
+                bool hasWarning = total > 0 && pct < 75.0;
+
+                result.Add(new CourseStudentAttendanceDto
+                {
+                    StudentId = enr.StudentId,
+                    StudentName = $"{enr.Student.FirstName} {enr.Student.LastName}".Trim(),
+                    StudentNumber = enr.Student.StudentNumber,
+                    Email = enr.Student.Email,
+                    TotalLessons = total,
+                    PresentCount = present,
+                    AbsentCount = absent,
+                    ExcusedCount = excused,
+                    AttendancePercentage = pct,
+                    HasAttendanceWarning = hasWarning
                 });
             }
 

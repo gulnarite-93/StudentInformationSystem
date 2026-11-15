@@ -1,0 +1,376 @@
+@model StudentInformationSystem.Web.Models.AdminDashboardStatsViewModel
+@{
+    ViewData["Title"] = "Admin İdarəetmə Paneli";
+}
+
+<div class="container-fluid py-2">
+    <!-- Başlıq və Xoş Gəlmisiniz Kartı -->
+    <div class="card border-0 rounded-4 shadow-sm bg-gradient text-white mb-4" 
+         style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <span class="badge bg-danger mb-2 px-3 py-1 fw-bold">
+                        <i class="bi bi-shield-lock-fill me-1"></i> Admin İdarəetmə Paneli
+                    </span>
+                    <h2 class="fw-bold mb-1">Akademik Statistika və Göstəricilər</h2>
+                    <p class="mb-0 text-white-50">
+                        Sistemdəki tələbə, müəllim, kurs və şöbələr üzrə ümumi statistik icmal və fəallıq göstəriciləri.
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <a asp-action="Students" class="btn btn-primary rounded-pill px-3 shadow-sm me-2">
+                        <i class="bi bi-people-fill me-1"></i> Tələbələr
+                    </a>
+                    <a asp-action="Courses" class="btn btn-outline-light rounded-pill px-3">
+                        <i class="bi bi-journal-bookmark-fill me-1"></i> Kurslar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 Əsas Statistika Kartı -->
+    <div class="row g-3 mb-4">
+        <!-- 1. Ümumi Tələbə Sayı -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0 rounded-4 p-3 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="text-muted text-uppercase fw-bold small">Ümumi Tələbələr</span>
+                        <h2 class="fw-bold text-primary mb-0 mt-1">@Model.TotalStudents</h2>
+                    </div>
+                    <div class="rounded-circle bg-primary-subtle text-primary p-3">
+                        <i class="bi bi-mortarboard-fill fs-4"></i>
+                    </div>
+                </div>
+                <div class="mt-auto pt-2 border-top">
+                    <a asp-action="Students" class="text-decoration-none small fw-semibold text-primary">
+                        Siyahıya bax <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Müəllim Sayı -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0 rounded-4 p-3 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="text-muted text-uppercase fw-bold small">Müəllimlər</span>
+                        <h2 class="fw-bold text-success mb-0 mt-1">@Model.TotalTeachers</h2>
+                    </div>
+                    <div class="rounded-circle bg-success-subtle text-success p-3">
+                        <i class="bi bi-person-video3 fs-4"></i>
+                    </div>
+                </div>
+                <div class="mt-auto pt-2 border-top">
+                    <span class="text-muted small">
+                        <i class="bi bi-check2-circle text-success me-1"></i>Fəal professor-müəllim heyəti
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Kurs Sayı -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0 rounded-4 p-3 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="text-muted text-uppercase fw-bold small">Kurslar (Fənlər)</span>
+                        <h2 class="fw-bold text-warning mb-0 mt-1">@Model.TotalCourses</h2>
+                    </div>
+                    <div class="rounded-circle bg-warning-subtle text-warning p-3">
+                        <i class="bi bi-journal-bookmark-fill fs-4"></i>
+                    </div>
+                </div>
+                <div class="mt-auto pt-2 border-top">
+                    <a asp-action="Courses" class="text-decoration-none small fw-semibold text-warning">
+                        Kursa bax <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Şöbə Sayı -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="card shadow-sm border-0 rounded-4 p-3 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="text-muted text-uppercase fw-bold small">Fakültə / Şöbələr</span>
+                        <h2 class="fw-bold text-info mb-0 mt-1">@Model.TotalDepartments</h2>
+                    </div>
+                    <div class="rounded-circle bg-info-subtle text-info p-3">
+                        <i class="bi bi-building fs-4"></i>
+                    </div>
+                </div>
+                <div class="mt-auto pt-2 border-top">
+                    <a asp-action="Departments" class="text-decoration-none small fw-semibold text-info">
+                        Şöbələrə bax <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orta GPA və Şöbə Qrafiki -->
+    <div class="row g-4 mb-4">
+        <!-- 5. Orta GPA Kartı -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 rounded-4 p-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <span class="badge bg-warning-subtle text-warning-emphasis px-3 py-1 rounded-pill fw-semibold">
+                            Akademik Müvəffəqiyyət
+                        </span>
+                        <h4 class="fw-bold mt-2 mb-1">Orta Tələbə GPA-sı</h4>
+                        <p class="text-muted small mb-0">Bütün tələbələrin ümumi ortalaması</p>
+                    </div>
+                    <div class="rounded-circle bg-warning-subtle text-warning p-3">
+                        <i class="bi bi-award-fill fs-3"></i>
+                    </div>
+                </div>
+
+                <div class="my-auto py-3 text-center">
+                    <div class="display-3 fw-bold text-dark mb-1">
+                        @Model.AverageGpa.ToString("0.00")
+                    </div>
+                    <span class="text-muted fw-semibold">/ 4.00 Maksimum</span>
+
+                    <div class="mt-3">
+                        @{
+                            string gpaBadgeClass = "bg-danger";
+                            string gpaText = "Qeyri-məqbul";
+                            if (Model.AverageGpa >= 3.5m)
+                            {
+                                gpaBadgeClass = "bg-success";
+                                gpaText = "A - Əla (3.50 - 4.00)";
+                            }
+                            else if (Model.AverageGpa >= 3.0m)
+                            {
+                                gpaBadgeClass = "bg-primary";
+                                gpaText = "B - Çox yaxşı (3.00 - 3.49)";
+                            }
+                            else if (Model.AverageGpa >= 2.0m)
+                            {
+                                gpaBadgeClass = "bg-info text-dark";
+                                gpaText = "C - Yaxşı (2.00 - 2.99)";
+                            }
+                            else if (Model.AverageGpa >= 1.5m)
+                            {
+                                gpaBadgeClass = "bg-warning text-dark";
+                                gpaText = "D - Kafi (1.50 - 1.99)";
+                            }
+                            else if (Model.AverageGpa >= 1.0m)
+                            {
+                                gpaBadgeClass = "bg-secondary";
+                                gpaText = "E - Qənaətbəxş (1.00 - 1.49)";
+                            }
+                        }
+                        <span class="badge @gpaBadgeClass px-3 py-2 fs-6 rounded-pill shadow-sm">
+                            <i class="bi bi-stars me-1"></i> @gpaText
+                        </span>
+                    </div>
+
+                    <div class="mt-4 px-2">
+                        <div class="d-flex justify-content-between small text-muted mb-1">
+                            <span>0.00</span>
+                            <span>2.00</span>
+                            <span>4.00</span>
+                        </div>
+                        <div class="progress" style="height: 12px; border-radius: 6px;">
+                            <div class="progress-bar bg-gradient bg-warning" role="progressbar" 
+                                 style="width: @(Math.Min(Model.AverageGpa / 4.0m * 100, 100))%;" 
+                                 aria-valuenow="@Model.AverageGpa" aria-valuemin="0" aria-valuemax="4"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-top pt-3 mt-auto">
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Hesablama tələbələrin yazıldığı fənlərin kredit çəkisi və qiymətləndirmə balları əsasında aparılır.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Şöbələr Üzrə Tələbə Sayı (Bar Chart) -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4 p-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h4 class="fw-bold mb-1">Şöbələr Üzrə Tələbə Sayı</h4>
+                        <p class="text-muted small mb-0">Akademik şöbələr üzrə tələbələrin bölgü diaqramı</p>
+                    </div>
+                    <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">
+                        <i class="bi bi-bar-chart-fill text-primary me-1"></i> Bar Chart
+                    </span>
+                </div>
+
+                <!-- Chart.js Canvas -->
+                <div class="chart-container position-relative mb-4" style="min-height: 250px;">
+                    <canvas id="departmentStudentChart"></canvas>
+                </div>
+
+                <!-- Sadə CSS Bar Bölgüsü (Alternativ və əlavə dəqiqlik üçün) -->
+                <div class="border-top pt-3">
+                    <h6 class="fw-bold text-muted small text-uppercase mb-3">Şöbələr üzrə ətraflı göstəricilər:</h6>
+                    <div class="row g-2">
+                        @if (Model.DepartmentStudentCounts != null && Model.DepartmentStudentCounts.Any())
+                        {
+                            var maxCount = Model.DepartmentStudentCounts.Max(d => d.StudentCount);
+                            if (maxCount == 0) maxCount = 1;
+
+                            @foreach (var dept in Model.DepartmentStudentCounts)
+                            {
+                                var pct = Model.TotalStudents > 0 
+                                    ? Math.Round((decimal)dept.StudentCount / Model.TotalStudents * 100, 1) 
+                                    : 0;
+                                var barWidth = Math.Round((decimal)dept.StudentCount / maxCount * 100, 1);
+
+                                <div class="col-md-6 mb-2">
+                                    <div class="p-2 border rounded-3 bg-light-subtle">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="fw-semibold text-dark text-truncate" title="@dept.DepartmentName">
+                                                <span class="badge bg-secondary-subtle text-secondary me-1">@dept.DepartmentCode</span>
+                                                @dept.DepartmentName
+                                            </span>
+                                            <span class="badge bg-primary rounded-pill">@dept.StudentCount tələbə (@pct%)</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-primary bg-gradient" role="progressbar" 
+                                                 style="width: @barWidth%;" 
+                                                 aria-valuenow="@dept.StudentCount" aria-valuemin="0" aria-valuemax="@maxCount"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-12 text-center text-muted py-3">
+                                <i class="bi bi-folder-x fs-3 d-block mb-1"></i>
+                                Şöbə məlumatı tapılmadı.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const ctx = document.getElementById('departmentStudentChart');
+            if (!ctx) return;
+
+            // Model məlumatlarını JavaScript massivlərinə çeviririk
+            const labels = [
+                @if (Model.DepartmentStudentCounts != null)
+                {
+                    @foreach (var dept in Model.DepartmentStudentCounts)
+                    {
+                        @: "@Html.Raw(dept.DepartmentName) (@Html.Raw(dept.DepartmentCode))",
+                    }
+                }
+            ];
+
+            const dataValues = [
+                @if (Model.DepartmentStudentCounts != null)
+                {
+                    @foreach (var dept in Model.DepartmentStudentCounts)
+                    {
+                        @: @dept.StudentCount,
+                    }
+                }
+            ];
+
+            // Rəng palitrası
+            const backgroundColors = [
+                'rgba(13, 110, 253, 0.85)',   // Primary mavi
+                'rgba(25, 135, 84, 0.85)',   // Success yaşıl
+                'rgba(255, 193, 7, 0.85)',   // Warning sarı
+                'rgba(111, 66, 193, 0.85)',  // Bənövşəyi
+                'rgba(13, 202, 240, 0.85)',  // Info firuzəyi
+                'rgba(220, 53, 69, 0.85)',   // Danger qırmızı
+                'rgba(108, 117, 125, 0.85)'  // Boz
+            ];
+
+            const borderColors = [
+                '#0d6efd',
+                '#198754',
+                '#ffc107',
+                '#6f42c1',
+                '#0dcaf0',
+                '#dc3545',
+                '#6c757d'
+            ];
+
+            if (typeof Chart !== 'undefined') {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Tələbə Sayı',
+                            data: dataValues,
+                            backgroundColor: backgroundColors.slice(0, labels.length),
+                            borderColor: borderColors.slice(0, labels.length),
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false,
+                            maxBarThickness: 50
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                titleFont: { size: 14, weight: 'bold' },
+                                bodyFont: { size: 13 },
+                                padding: 12,
+                                cornerRadius: 8,
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' Tələbə sayı: ' + context.parsed.y;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    precision: 0,
+                                    font: { size: 12 }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    font: { size: 12, weight: '500' }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

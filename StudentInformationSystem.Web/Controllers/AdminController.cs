@@ -16,6 +16,23 @@ namespace StudentInformationSystem.Web.Controllers
             _apiService = apiService;
         }
 
+        #region 0. İdarəetmə Paneli (Dashboard & Statistics)
+
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return RedirectToAction(nameof(Dashboard));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Dashboard()
+        {
+            var stats = await _apiService.GetAsync<AdminDashboardStatsViewModel>("api/admin/dashboard-stats");
+            return View(stats ?? new AdminDashboardStatsViewModel());
+        }
+
+        #endregion
+
         #region 1. Şöbələr (Departments)
 
         [HttpGet]
@@ -338,19 +355,24 @@ namespace StudentInformationSystem.Web.Controllers
         #region 4. Tələbələr (Students)
 
         [HttpGet]
-        public async Task<IActionResult> Students(string? search = null, int? programmeId = null, int? academicYear = null)
+        public async Task<IActionResult> Students(string? search = null, int? programmeId = null, int? academicYear = null, int? departmentId = null)
         {
             var queryParams = new List<string>();
             if (!string.IsNullOrWhiteSpace(search)) queryParams.Add($"search={Uri.EscapeDataString(search.Trim())}");
+            if (departmentId.HasValue && departmentId.Value > 0) queryParams.Add($"departmentId={departmentId.Value}");
             if (programmeId.HasValue && programmeId.Value > 0) queryParams.Add($"programmeId={programmeId.Value}");
             if (academicYear.HasValue && academicYear.Value > 0) queryParams.Add($"academicYear={academicYear.Value}");
 
             var endpoint = "api/students" + (queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "");
             var list = await _apiService.GetAsync<List<StudentViewModel>>(endpoint) ?? new List<StudentViewModel>();
 
+            var departments = await _apiService.GetAsync<List<DepartmentViewModel>>("api/departments") ?? new List<DepartmentViewModel>();
             var programmes = await _apiService.GetAsync<List<ProgrammeViewModel>>("api/programmes") ?? new List<ProgrammeViewModel>();
+
+            ViewBag.Departments = departments;
             ViewBag.Programmes = programmes;
             ViewBag.CurrentSearch = search;
+            ViewBag.CurrentDepartmentId = departmentId;
             ViewBag.CurrentProgrammeId = programmeId;
             ViewBag.CurrentAcademicYear = academicYear;
 
@@ -487,10 +509,11 @@ namespace StudentInformationSystem.Web.Controllers
         #region 5. Kurs Kataloqu və İdarəsi (Courses)
 
         [HttpGet]
-        public async Task<IActionResult> Courses(string? search = null, int? termId = null, int? programmeId = null, int? teacherId = null)
+        public async Task<IActionResult> Courses(string? search = null, int? termId = null, int? programmeId = null, int? teacherId = null, int? departmentId = null)
         {
             var queryParams = new List<string>();
             if (!string.IsNullOrWhiteSpace(search)) queryParams.Add($"search={Uri.EscapeDataString(search.Trim())}");
+            if (departmentId.HasValue && departmentId.Value > 0) queryParams.Add($"departmentId={departmentId.Value}");
             if (termId.HasValue && termId.Value > 0) queryParams.Add($"termId={termId.Value}");
             if (programmeId.HasValue && programmeId.Value > 0) queryParams.Add($"programmeId={programmeId.Value}");
             if (teacherId.HasValue && teacherId.Value > 0) queryParams.Add($"teacherId={teacherId.Value}");
@@ -498,14 +521,17 @@ namespace StudentInformationSystem.Web.Controllers
             var endpoint = "api/courses" + (queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "");
             var list = await _apiService.GetAsync<List<CourseViewModel>>(endpoint) ?? new List<CourseViewModel>();
 
+            var departments = await _apiService.GetAsync<List<DepartmentViewModel>>("api/departments") ?? new List<DepartmentViewModel>();
             var terms = await _apiService.GetAsync<List<TermViewModel>>("api/terms") ?? new List<TermViewModel>();
             var programmes = await _apiService.GetAsync<List<ProgrammeViewModel>>("api/programmes") ?? new List<ProgrammeViewModel>();
             var teachers = await _apiService.GetAsync<List<TeacherSelectItem>>("api/courses/teachers") ?? new List<TeacherSelectItem>();
 
+            ViewBag.Departments = departments;
             ViewBag.Terms = terms;
             ViewBag.Programmes = programmes;
             ViewBag.Teachers = teachers;
             ViewBag.CurrentSearch = search;
+            ViewBag.CurrentDepartmentId = departmentId;
             ViewBag.CurrentTermId = termId;
             ViewBag.CurrentProgrammeId = programmeId;
             ViewBag.CurrentTeacherId = teacherId;
@@ -794,10 +820,14 @@ namespace StudentInformationSystem.Web.Controllers
                 var sessions = await _apiService.GetAsync<List<LessonSessionSummaryViewModel>>($"api/attendance/course/{selectedCourseId}/sessions")
                     ?? new List<LessonSessionSummaryViewModel>();
 
+                var studentAttendances = await _apiService.GetAsync<List<CourseStudentAttendanceViewModel>>($"api/attendance/course/{selectedCourseId}/students-attendance")
+                    ?? new List<CourseStudentAttendanceViewModel>();
+
                 if (course != null)
                 {
                     model.Course = course;
                     model.Sessions = sessions;
+                    model.StudentAttendances = studentAttendances;
                 }
             }
 

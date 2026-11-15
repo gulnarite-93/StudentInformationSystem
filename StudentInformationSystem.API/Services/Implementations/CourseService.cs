@@ -31,7 +31,7 @@ namespace StudentInformationSystem.API.Services.Implementations
             _attendanceRepo = attendanceRepo;
         }
 
-        public async Task<IReadOnlyList<CourseDto>> GetAllAsync(string? search = null, int? termId = null, int? programmeId = null, int? teacherId = null)
+        public async Task<IReadOnlyList<CourseDto>> GetAllAsync(string? search = null, int? termId = null, int? programmeId = null, int? teacherId = null, int? departmentId = null)
         {
             var query = _courseRepo.Query()
                 .Include(c => c.Programme)
@@ -48,6 +48,11 @@ namespace StudentInformationSystem.API.Services.Implementations
                     c.Name.ToLower().Contains(term) ||
                     c.Code.ToLower().Contains(term) ||
                     (c.Description != null && c.Description.ToLower().Contains(term)));
+            }
+
+            if (departmentId.HasValue && departmentId.Value > 0)
+            {
+                query = query.Where(c => c.Programme != null && c.Programme.DepartmentId == departmentId.Value);
             }
 
             if (termId.HasValue && termId.Value > 0)

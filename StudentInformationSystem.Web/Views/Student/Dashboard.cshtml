@@ -33,6 +33,34 @@
         </div>
     </div>
 
+    @if (Model.HasAttendanceWarning)
+    {
+        <div class="alert alert-danger border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center">
+            <div class="rounded-circle bg-danger text-white p-3 me-3 d-flex align-items-center justify-content-center">
+                <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+            </div>
+            <div class="flex-grow-1">
+                <h5 class="fw-bold mb-1 text-danger">
+                    <i class="bi bi-bell-fill me-1"></i>Diqqət: Davamiyyətiniz aşağıdır!
+                </h5>
+                <p class="mb-0 text-dark small">
+                    Aktiv semestrdə yazıldığınız fənlər üzrə davamiyyətiniz <strong>75%-dən aşağıdır</strong>:
+                    @if (Model.LowAttendanceCourses != null && Model.LowAttendanceCourses.Any())
+                    {
+                        var lowCourses = string.Join(", ", Model.LowAttendanceCourses);
+                        <strong>@lowCourses</strong><text>.</text>
+                    }
+                    Qayıb limitinə görə fəndən kəsilmə və ya imtahana buraxılmama riski ilə üzləşməmək üçün dərslərdə iştirakınızı təmin edin.
+                </p>
+            </div>
+            <div class="ms-3">
+                <a asp-action="Attendance" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm fw-semibold">
+                    <i class="bi bi-calendar-check me-1"></i> Davamiyyətə Bax
+                </a>
+            </div>
+        </div>
+    }
+
     <!-- 4 Esas Statistik Kart -->
     <div class="row g-3 mb-4">
         <!-- 1. Cari GPA -->
@@ -175,7 +203,16 @@
                                             <td class="ps-4">
                                                 <span class="badge bg-secondary font-monospace">@c.CourseCode</span>
                                             </td>
-                                            <td class="fw-semibold text-dark">@c.CourseName</td>
+                                            <td class="fw-semibold text-dark">
+                                                @c.CourseName
+                                                @if (c.HasAttendanceWarning && c.AttendancePercentage.HasValue)
+                                                {
+                                                    var pctStr = c.AttendancePercentage.Value.ToString("0.#");
+                                                    <span class="badge bg-danger ms-2 px-2 py-1 shadow-sm" title="Davamiyyət 75%-dən aşağıdır!">
+                                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>Diqqət: Davamiyyət @pctStr%
+                                                    </span>
+                                                }
+                                            </td>
                                             <td class="text-center">
                                                 <span class="badge bg-light text-dark border">@c.Credits Kredit</span>
                                             </td>

@@ -60,6 +60,12 @@
                         </td>
                         <td>
                             <strong class="text-dark">@r.StudentName</strong>
+                            @if (r.HasAttendanceWarning)
+                            {
+                                <span class="badge bg-danger ms-2 px-2 py-1 shadow-sm">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Diqqət: davamiyyət aşağıdır (@(r.CourseAttendancePercentage)%)
+                                </span>
+                            }
                         </td>
                         <td>
                             @if (r.Status == "Present")

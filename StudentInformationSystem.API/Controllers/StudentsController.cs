@@ -23,9 +23,10 @@ namespace StudentInformationSystem.API.Controllers
         public async Task<ActionResult<IReadOnlyList<StudentDto>>> GetAll(
             [FromQuery] string? search = null,
             [FromQuery] int? programmeId = null,
-            [FromQuery] int? academicYear = null)
+            [FromQuery] int? academicYear = null,
+            [FromQuery] int? departmentId = null)
         {
-            var students = await _studentService.GetAllAsync(search, programmeId, academicYear);
+            var students = await _studentService.GetAllAsync(search, programmeId, academicYear, departmentId);
             return Ok(students);
         }
 
