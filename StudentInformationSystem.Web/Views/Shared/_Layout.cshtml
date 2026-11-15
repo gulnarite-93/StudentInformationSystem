@@ -33,6 +33,11 @@
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
+                                    <a class="nav-link text-warning fw-semibold" asp-controller="Admin" asp-action="Dashboard">
+                                        <i class="bi bi-speedometer2 me-1"></i> İdarəetmə Paneli
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a class="nav-link text-white fw-semibold" asp-controller="Admin" asp-action="Students">
                                         <i class="bi bi-people-fill me-1"></i> Tələbələr
                                     </a>

@@ -20,7 +20,7 @@ namespace StudentInformationSystem.Web.Controllers
                 }
                 if (User.IsInRole("Admin"))
                 {
-                    return RedirectToAction("Departments", "Admin");
+                    return RedirectToAction("Dashboard", "Admin");
                 }
             }
 

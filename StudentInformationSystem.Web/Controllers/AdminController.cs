@@ -16,6 +16,23 @@ namespace StudentInformationSystem.Web.Controllers
             _apiService = apiService;
         }
 
+        #region 0. İdarəetmə Paneli (Dashboard & Statistics)
+
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return RedirectToAction(nameof(Dashboard));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Dashboard()
+        {
+            var stats = await _apiService.GetAsync<AdminDashboardStatsViewModel>("api/admin/dashboard-stats");
+            return View(stats ?? new AdminDashboardStatsViewModel());
+        }
+
+        #endregion
+
         #region 1. Şöbələr (Departments)
 
         [HttpGet]
