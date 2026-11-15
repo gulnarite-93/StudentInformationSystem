@@ -16,22 +16,26 @@ namespace StudentInformationSystem.Web.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string? search = null, int? termId = null, int? programmeId = null)
+        public async Task<IActionResult> Index(string? search = null, int? termId = null, int? programmeId = null, int? departmentId = null)
         {
             var queryParams = new List<string>();
             if (!string.IsNullOrWhiteSpace(search)) queryParams.Add($"search={Uri.EscapeDataString(search.Trim())}");
+            if (departmentId.HasValue && departmentId.Value > 0) queryParams.Add($"departmentId={departmentId.Value}");
             if (termId.HasValue && termId.Value > 0) queryParams.Add($"termId={termId.Value}");
             if (programmeId.HasValue && programmeId.Value > 0) queryParams.Add($"programmeId={programmeId.Value}");
 
             var endpoint = "api/courses" + (queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "");
             var list = await _apiService.GetAsync<List<CourseViewModel>>(endpoint) ?? new List<CourseViewModel>();
 
+            var departments = await _apiService.GetAsync<List<DepartmentViewModel>>("api/departments") ?? new List<DepartmentViewModel>();
             var terms = await _apiService.GetAsync<List<TermViewModel>>("api/terms") ?? new List<TermViewModel>();
             var programmes = await _apiService.GetAsync<List<ProgrammeViewModel>>("api/programmes") ?? new List<ProgrammeViewModel>();
 
+            ViewBag.Departments = departments;
             ViewBag.Terms = terms;
             ViewBag.Programmes = programmes;
             ViewBag.CurrentSearch = search;
+            ViewBag.CurrentDepartmentId = departmentId;
             ViewBag.CurrentTermId = termId;
             ViewBag.CurrentProgrammeId = programmeId;
 

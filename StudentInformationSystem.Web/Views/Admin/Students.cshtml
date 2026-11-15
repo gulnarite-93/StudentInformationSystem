@@ -1,8 +1,10 @@
 ﻿@model IEnumerable<StudentInformationSystem.Web.Models.StudentViewModel>
 @{
     ViewData["Title"] = "Tələbələrin İdarə Edilməsi";
+    var departments = ViewBag.Departments as List<StudentInformationSystem.Web.Models.DepartmentViewModel> ?? new();
     var programmes = ViewBag.Programmes as List<StudentInformationSystem.Web.Models.ProgrammeViewModel> ?? new();
     string? currentSearch = ViewBag.CurrentSearch as string;
+    int? currentDepartmentId = ViewBag.CurrentDepartmentId as int?;
     int? currentProgrammeId = ViewBag.CurrentProgrammeId as int?;
     int? currentAcademicYear = ViewBag.CurrentAcademicYear as int?;
 }
@@ -37,15 +39,24 @@
 <div class="card shadow-sm border-0 mb-4 rounded-3">
     <div class="card-body p-3">
         <form asp-action="Students" method="get" class="row g-2 align-items-center">
-            <div class="col-md-5">
+            <div class="col-md-3">
                 <div class="input-group">
                     <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" name="search" value="@currentSearch" class="form-control" placeholder="Ad, soyad, tələbə nömrəsi, e-poçt ilə axtar..." />
+                    <input type="text" name="search" value="@currentSearch" class="form-control" placeholder="Ada, nömrəyə görə axtar..." />
                 </div>
             </div>
             <div class="col-md-3">
+                <select name="departmentId" class="form-select">
+                    <option value="">-- Bütün Şöbələr --</option>
+                    @foreach (var d in departments)
+                    {
+                        <option value="@d.Id" selected="@(currentDepartmentId == d.Id)">@d.Name (@d.Code)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
                 <select name="programmeId" class="form-select">
-                    <option value="">-- Bütün İxtisaslar --</option>
+                    <option value="">-- Bütün Proqramlar --</option>
                     @foreach (var p in programmes)
                     {
                         <option value="@p.Id" selected="@(currentProgrammeId == p.Id)">@p.Name</option>
@@ -65,7 +76,7 @@
                 <button type="submit" class="btn btn-primary w-100 fw-semibold">
                     <i class="bi bi-funnel me-1"></i> Filtrlə
                 </button>
-                @if (!string.IsNullOrEmpty(currentSearch) || currentProgrammeId.HasValue || currentAcademicYear.HasValue)
+                @if (!string.IsNullOrEmpty(currentSearch) || currentDepartmentId.HasValue || currentProgrammeId.HasValue || currentAcademicYear.HasValue)
                 {
                     <a asp-action="Students" class="btn btn-outline-secondary" title="Sıfırla">
                         <i class="bi bi-x-lg"></i>

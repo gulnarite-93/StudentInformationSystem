@@ -4,7 +4,7 @@ namespace StudentInformationSystem.API.Services.Interfaces
 {
     public interface ICourseService
     {
-        Task<IReadOnlyList<CourseDto>> GetAllAsync(string? search = null, int? termId = null, int? programmeId = null, int? teacherId = null);
+        Task<IReadOnlyList<CourseDto>> GetAllAsync(string? search = null, int? termId = null, int? programmeId = null, int? teacherId = null, int? departmentId = null);
         Task<CourseDto?> GetByIdAsync(int id);
         Task<IReadOnlyList<TeacherSimpleDto>> GetTeachersListAsync();
         Task<(bool Success, CourseDto? Course, string? ErrorMessage)> CreateAsync(CourseCreateDto dto);
