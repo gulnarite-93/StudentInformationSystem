@@ -11,5 +11,6 @@ namespace StudentInformationSystem.API.Services.Interfaces
         Task<(bool Success, string? ErrorMessage)> UpdateSessionAsync(UpdateLessonSessionDto dto, int currentUserId, string currentUserRole);
         Task<(bool Success, string? ErrorMessage)> DeleteSessionAsync(int courseId, DateTime lessonDate, int currentUserId, string currentUserRole);
         Task<IReadOnlyList<StudentCourseAttendanceSummaryDto>> GetStudentAttendanceAsync(int studentId);
+        Task<IReadOnlyList<CourseStudentAttendanceDto>> GetCourseStudentsAttendanceAsync(int courseId, int currentUserId, string currentUserRole);
     }
 }

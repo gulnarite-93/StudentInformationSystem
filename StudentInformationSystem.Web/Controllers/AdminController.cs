@@ -811,10 +811,14 @@ namespace StudentInformationSystem.Web.Controllers
                 var sessions = await _apiService.GetAsync<List<LessonSessionSummaryViewModel>>($"api/attendance/course/{selectedCourseId}/sessions")
                     ?? new List<LessonSessionSummaryViewModel>();
 
+                var studentAttendances = await _apiService.GetAsync<List<CourseStudentAttendanceViewModel>>($"api/attendance/course/{selectedCourseId}/students-attendance")
+                    ?? new List<CourseStudentAttendanceViewModel>();
+
                 if (course != null)
                 {
                     model.Course = course;
                     model.Sessions = sessions;
+                    model.StudentAttendances = studentAttendances;
                 }
             }
 

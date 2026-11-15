@@ -10,6 +10,8 @@ namespace StudentInformationSystem.API.DTOs.Attendances
         public string? StudentNumber { get; set; }
         public string Status { get; set; } = "Present"; // Present, Absent, Excused
         public string? Note { get; set; }
+        public double CourseAttendancePercentage { get; set; }
+        public bool HasAttendanceWarning { get; set; }
     }
 
     public class LessonSessionSummaryDto
@@ -101,6 +103,21 @@ namespace StudentInformationSystem.API.DTOs.Attendances
         public int AbsentCount { get; set; }
         public int ExcusedCount { get; set; }
         public double AttendancePercentage { get; set; }
+        public bool HasAttendanceWarning { get; set; }
         public List<StudentAttendanceItemDto> History { get; set; } = new();
+    }
+
+    public class CourseStudentAttendanceDto
+    {
+        public int StudentId { get; set; }
+        public string StudentName { get; set; } = string.Empty;
+        public string? StudentNumber { get; set; }
+        public string? Email { get; set; }
+        public int TotalLessons { get; set; }
+        public int PresentCount { get; set; }
+        public int AbsentCount { get; set; }
+        public int ExcusedCount { get; set; }
+        public double AttendancePercentage { get; set; }
+        public bool HasAttendanceWarning { get; set; }
     }
 }
