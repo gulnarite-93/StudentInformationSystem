@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,9 @@ namespace StudentInformationSystem.API
             // 1. Verilənlər Bazası (SQL Server və EF Core)
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? "Server=.\\SQLEXPRESS;Database=StudentInformationSystemDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true;";
+
+            // Avtomatik Baza Vəziyyəti Yoxlanışı və Bərpası (RECOVERY_PENDING və AUTO_CLOSE aradan qaldırılması)
+            await EnsureDatabaseIsOnlineAsync(connectionString);
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(connectionString));
@@ -165,6 +169,67 @@ namespace StudentInformationSystem.API
             }
 
             await app.RunAsync();
+        }
+
+        private static async Task EnsureDatabaseIsOnlineAsync(string connectionString)
+        {
+            try
+            {
+                var builder = new SqlConnectionStringBuilder(connectionString);
+                var targetDb = builder.InitialCatalog;
+                if (string.IsNullOrWhiteSpace(targetDb)) return;
+
+                builder.InitialCatalog = "master";
+                builder.ConnectTimeout = 5;
+
+                await using var conn = new SqlConnection(builder.ConnectionString);
+                await conn.OpenAsync();
+
+                await using var cmd = conn.CreateCommand();
+                cmd.CommandTimeout = 10;
+                cmd.CommandText = "SELECT CAST(DATABASEPROPERTYEX(@dbName, 'Status') AS varchar(50)), CAST(DATABASEPROPERTYEX(@dbName, 'IsAutoClose') AS int)";
+                cmd.Parameters.AddWithValue("@dbName", targetDb);
+
+                string? stateDesc = null;
+                int isAutoClose = 0;
+                await using (var reader = await cmd.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        stateDesc = reader.IsDBNull(0) ? null : reader.GetString(0);
+                        isAutoClose = reader.IsDBNull(1) ? 0 : reader.GetInt32(1);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(stateDesc) && !stateDesc.Equals("ONLINE", StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine($"--> [DatabaseRecovery] Baza '{targetDb}' hazırda '{stateDesc}' vəziyyətindədir. Avtomatik ONLINE edilir...");
+                    cmd.Parameters.Clear();
+                    try
+                    {
+                        cmd.CommandText = $"ALTER DATABASE [{targetDb}] SET ONLINE";
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                    catch
+                    {
+                        cmd.CommandText = $"ALTER DATABASE [{targetDb}] SET EMERGENCY; ALTER DATABASE [{targetDb}] SET MULTI_USER; ALTER DATABASE [{targetDb}] SET ONLINE;";
+                        await cmd.ExecuteNonQueryAsync();
+                    }
+                    Console.WriteLine($"--> [DatabaseRecovery] Baza '{targetDb}' uğurla ONLINE vəziyyətinə gətirildi!");
+                }
+
+                if (isAutoClose == 1)
+                {
+                    cmd.Parameters.Clear();
+                    cmd.CommandText = $"ALTER DATABASE [{targetDb}] SET AUTO_CLOSE OFF WITH NO_WAIT";
+                    await cmd.ExecuteNonQueryAsync();
+                    Console.WriteLine($"--> [DatabaseRecovery] Baza '{targetDb}' AUTO_CLOSE=OFF edildi!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"--> [DatabaseRecovery] Baza vəziyyəti yoxlanarkən xəbərdarlıq: {ex.Message}");
+            }
         }
     }
 }

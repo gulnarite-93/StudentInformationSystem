@@ -1,4 +1,4 @@
-@model StudentInformationSystem.Web.Models.StudentDashboardViewModel
+﻿@model StudentInformationSystem.Web.Models.StudentDashboardViewModel
 @{
     ViewData["Title"] = "Akademik Panel (Dashboard)";
 }
@@ -10,7 +10,7 @@
         <div class="card-body p-4">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <span class="badge bg-white text-primary mb-2 px-3 py-1 fw-bold">Tələbə Portalı (F6)</span>
+                    <span class="badge bg-white text-primary mb-2 px-3 py-1 fw-bold">Tələbə Portalı</span>
                     <h2 class="fw-bold mb-1">Xoş gəldiniz, @Model.FullName!</h2>
                     <p class="mb-0 text-white-50">
                         <span class="me-3"><i class="bi bi-person-vcard me-1"></i>Tələbə №: <strong>@(string.IsNullOrEmpty(Model.StudentNumber) ? "Yoxdur" : Model.StudentNumber)</strong></span>
@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    <!-- 4 Əsas Statistik Kart (F6 Tələbləri) -->
+    <!-- 4 Esas Statistik Kart -->
     <div class="row g-3 mb-4">
         <!-- 1. Cari GPA -->
         <div class="col-md-6 col-xl-3">

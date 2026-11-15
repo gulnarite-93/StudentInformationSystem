@@ -32,22 +32,29 @@
                         {
                             @if (User.IsInRole("Admin"))
                             {
+                                <li class="nav-item">
+                                    <a class="nav-link text-white fw-semibold" asp-controller="Admin" asp-action="Students">
+                                        <i class="bi bi-people-fill me-1"></i> Tələbələr
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white fw-semibold" asp-controller="Admin" asp-action="Courses">
+                                        <i class="bi bi-journal-bookmark-fill me-1"></i> Kurslar
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white fw-semibold" asp-controller="Admin" asp-action="Attendance">
+                                        <i class="bi bi-calendar-check me-1"></i> Davamiyyət
+                                    </a>
+                                </li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-warning" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-gear-fill me-1"></i> İdarəetmə
+                                        <i class="bi bi-gear-fill me-1"></i> Akademik Struktur
                                     </a>
                                     <ul class="dropdown-menu shadow" aria-labelledby="adminDropdown">
-                                        <li><h6 class="dropdown-header text-uppercase small">Akademik Struktur (F8)</h6></li>
                                         <li><a class="dropdown-item" asp-controller="Admin" asp-action="Departments"><i class="bi bi-building me-2"></i>Şöbələr (Departments)</a></li>
                                         <li><a class="dropdown-item" asp-controller="Admin" asp-action="Programmes"><i class="bi bi-diagram-3 me-2"></i>Proqramlar (Programmes)</a></li>
                                         <li><a class="dropdown-item" asp-controller="Admin" asp-action="Terms"><i class="bi bi-calendar3 me-2"></i>Akademik Dövrlər (Terms)</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><h6 class="dropdown-header text-uppercase">Qiymətlər & Transkript (F4/F6)</h6></li>
-                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="CourseGrades" asp-route-courseId="2"><i class="bi bi-award me-2"></i>Fənn Qiymətləri (IT102 Jurnalı)</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="StudentTranscript" asp-route-studentId="4"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Aydan Məmmədova Transkripti</a></li>
-                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="StudentDashboard" asp-route-studentId="4"><i class="bi bi-speedometer2 me-2"></i>Aydan Məmmədova Paneli (GPA)</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" asp-controller="Announcements" asp-action="Index"><i class="bi bi-megaphone-fill me-2 text-warning"></i>Elanlar İdarəetməsi (F7)</a></li>
                                     </ul>
                                 </li>
                             }
@@ -55,8 +62,18 @@
                             @if (User.IsInRole("Teacher"))
                             {
                                 <li class="nav-item">
+                                    <a class="nav-link text-white fw-semibold" asp-controller="Teacher" asp-action="Courses">
+                                        <i class="bi bi-journal-check me-1"></i> Kurslarım
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white fw-semibold" asp-controller="Teacher" asp-action="Attendance">
+                                        <i class="bi bi-calendar-check me-1"></i> Davamiyyət
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a class="nav-link text-success fw-semibold" asp-controller="Teacher" asp-action="Grades">
-                                        <i class="bi bi-award-fill me-1"></i> Qiymətləndirmə (F4)
+                                        <i class="bi bi-award-fill me-1"></i> Qiymətləndirmə
                                     </a>
                                 </li>
                             }
@@ -65,25 +82,40 @@
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-info fw-semibold" asp-controller="Student" asp-action="Dashboard">
-                                        <i class="bi bi-speedometer2 me-1"></i> Akademik Panel (F6)
+                                        <i class="bi bi-speedometer2 me-1"></i> Akademik Panel
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-controller="Student" asp-action="Profile">
+                                        <i class="bi bi-person-badge me-1"></i> Profilim
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-controller="Student" asp-action="Enrollment">
+                                        <i class="bi bi-pencil-square me-1"></i> Kurs Seçimi
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link text-white" asp-controller="Student" asp-action="Grades">
-                                        <i class="bi bi-award me-1"></i> Qiymətlərim (F4)
+                                        <i class="bi bi-award me-1"></i> Qiymətlərim
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-controller="Student" asp-action="Attendance">
+                                        <i class="bi bi-calendar-check me-1"></i> Davamiyyətim
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link text-warning" asp-controller="Student" asp-action="Transcript">
-                                        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Transkript & GPA (F4/F6)
+                                        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Transkript & GPA
                                     </a>
                                 </li>
                             }
 
-                            <!-- Hamı üçün Kurs Kataloqu (F2) -->
+                            <!-- Hamı üçün Kurs Kataloqu -->
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Courses" asp-action="Index">
-                                    <i class="bi bi-journal-text me-1"></i> Kurs Kataloqu (F2)
+                                <a class="nav-link text-white" asp-controller="Courses" asp-action="Index">
+                                    <i class="bi bi-journal-text me-1"></i> Kurs Kataloqu
                                 </a>
                             </li>
 
