@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="../../../Downloads/README.md" />
+  </Folder>
   <Project Path="StudentInformationSystem.API/StudentInformationSystem.API.csproj" />
   <Project Path="StudentInformationSystem.Web/StudentInformationSystem.Web.csproj" />
 </Solution>
